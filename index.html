@@ -25,12 +25,15 @@
       flex-grow: 1;
       overflow-y: auto;
       padding: 1rem;
+      display: flex;
+      flex-direction: column;
     }
     .message {
       margin-bottom: 1rem;
       padding: 0.5rem 1rem;
       border-radius: 10px;
       max-width: 80%;
+      word-wrap: break-word;
     }
     .user {
       background-color: #2b2c2f;
@@ -52,6 +55,11 @@
       border: none;
       border-radius: 8px;
       font-size: 1rem;
+      color: #fff;
+      background-color: #2b2c2f;
+    }
+    input::placeholder {
+      color: #888;
     }
     button {
       margin-left: 1rem;
@@ -62,6 +70,10 @@
       color: white;
       font-size: 1rem;
       cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #0e8b6e;
     }
   </style>
 </head>
@@ -74,7 +86,11 @@
   </div>
 
   <script>
-    const apiKey = "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";
+    // שים לב! חשוב לא לחשוף מפתח API בצד לקוח.
+    // מומלץ להגדיר שרת צד שרת שיקבל את הבקשה ויעביר אותה ל-OpenAI עם המפתח.
+    // כאן לדוגמה בלבד - אסור לשים API Key אמיתי בקוד בצד לקוח.
+
+    const apiKey = "sk-..."; // החלף במפתח שלך או עדיף - הסר אותו מכאן
 
     async function sendMessage() {
       const input = document.getElementById("userInput");
@@ -84,28 +100,46 @@
       addMessage("user", message);
       input.value = "";
 
+      // הוסף הודעת "חושב..."
       addMessage("bot", "חושב...");
 
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-          model: "gpt-3.5-turbo",
-          messages: [{ role: "user", content: message }]
-        })
-      });
+      try {
+        const response = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model: "gpt-3.5-turbo",
+            messages: [{ role: "user", content: message }]
+          })
+        });
 
-      const data = await response.json();
-      const botMessage = data.choices?.[0]?.message?.content || "תקלה! נסה שוב מאוחר יותר.";
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-      // הסר את הודעת "חושב..."
-      const chat = document.getElementById("chat");
-      chat.removeChild(chat.lastChild);
+        const data = await response.json();
+        const botMessage = data.choices?.[0]?.message?.content || "תקלה! נסה שוב מאוחר יותר.";
 
-      addMessage("bot", botMessage);
+        // הסר את הודעת "חושב..."
+        const chat = document.getElementById("chat");
+        if (chat.lastChild && chat.lastChild.classList.contains("bot") && chat.lastChild.textContent === "חושב...") {
+          chat.removeChild(chat.lastChild);
+        }
+
+        addMessage("bot", botMessage);
+
+      } catch (error) {
+        // הסר את הודעת "חושב..."
+        const chat = document.getElementById("chat");
+        if (chat.lastChild && chat.lastChild.classList.contains("bot") && chat.lastChild.textContent === "חושב...") {
+          chat.removeChild(chat.lastChild);
+        }
+        addMessage("bot", "תקלה בשרת, נסה שוב מאוחר יותר.");
+        console.error("Error:", error);
+      }
     }
 
     function addMessage(role, text) {
