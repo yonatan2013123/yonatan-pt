@@ -1,30 +1,104 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-require('dotenv').config();
-const { Configuration, OpenAIApi } = require('openai');
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8" />
+  <title>YonatanPT</title>
+  <style>
+    body {
+      background-color: #1e1e2f;
+      color: white;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: #2c2c3d;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.5rem;
+    }
+    #chat {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+    }
+    .msg {
+      max-width: 60%;
+      margin: 10px;
+      padding: 10px;
+      border-radius: 10px;
+    }
+    .user {
+      background-color: #007acc;
+      margin-left: auto;
+    }
+    .bot {
+      background-color: #444;
+      margin-right: auto;
+    }
+    #inputBox {
+      display: flex;
+      border-top: 1px solid #333;
+    }
+    #input {
+      flex: 1;
+      padding: 1rem;
+      border: none;
+      background: #2e2e3e;
+      color: white;
+    }
+    #sendBtn {
+      padding: 1rem;
+      background-color: #007acc;
+      color: white;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <header>YonatanPT</header>
+  <div id="chat"></div>
+  <div id="inputBox">
+    <input id="input" placeholder="שאל משהו...">
+    <button id="sendBtn">שלח</button>
+  </div>
 
-const app = express();
-app.use(cors());
-app.use(bodyParser.json());
-app.use(express.static(__dirname));
+  <script>
+    const chat = document.getElementById('chat');
+    const input = document.getElementById('input');
+    const sendBtn = document.getElementById('sendBtn');
 
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-const openai = new OpenAIApi(configuration);
+    function append(message, sender) {
+      const div = document.createElement('div');
+      div.className = `msg ${sender}`;
+      div.textContent = message;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
 
-app.post('/chat', async (req, res) => {
-  const userMessage = req.body.message;
-  try {
-    const response = await openai.createChatCompletion({
-      model: 'gpt-3.5-turbo',
-      messages: [{ role: 'user', content: userMessage }],
+    async function send() {
+      const text = input.value.trim();
+      if (!text) return;
+      append(text, 'user');
+      input.value = '';
+
+      const res = await fetch('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text }),
+      });
+
+      const data = await res.json();
+      append(data.reply, 'bot');
+    }
+
+    sendBtn.onclick = send;
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') send();
     });
-    res.json({ reply: response.data.choices[0].message.content });
-  } catch (err) {
-    res.status(500).json({ reply: 'שגיאה בשיחה: ' + err.message });
-  }
-});
-
-app.listen(3000, () => console.log('השרת רץ בכתובת http://localhost:3000'));
+  </script>
+</body>
+</html>
