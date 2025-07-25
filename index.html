@@ -1,0 +1,162 @@
+const express = require("express");
+const bodyParser = require("body-parser");
+const { Configuration, OpenAIApi } = require("openai");
+const app = express();
+require("dotenv").config();
+
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+const openai = new OpenAIApi(configuration);
+
+app.use(bodyParser.json());
+
+// שליחת דף HTML ישירות
+app.get("/", (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="he">
+    <head>
+      <meta charset="UTF-8">
+      <title>YonatanPT - צ'אט AI</title>
+      <style>
+        body {
+          margin: 0;
+          background: #343541;
+          color: #fff;
+          font-family: sans-serif;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+        }
+        .container {
+          width: 100%;
+          max-width: 700px;
+          display: flex;
+          flex-direction: column;
+          padding: 10px;
+        }
+        .chat-header {
+          font-size: 24px;
+          text-align: center;
+          padding: 20px;
+          font-weight: bold;
+          background: #202123;
+          border-radius: 8px;
+        }
+        .chat-window {
+          flex: 1;
+          background: #444654;
+          margin: 10px 0;
+          padding: 15px;
+          overflow-y: auto;
+          border-radius: 8px;
+          height: 70vh;
+        }
+        .message {
+          margin-bottom: 10px;
+          padding: 10px;
+          border-radius: 6px;
+          max-width: 90%;
+        }
+        .user {
+          background: #0b93f6;
+          align-self: flex-end;
+          text-align: right;
+        }
+        .bot {
+          background: #555;
+          align-self: flex-start;
+          text-align: right;
+        }
+        #chat-form {
+          display: flex;
+          gap: 10px;
+        }
+        #prompt {
+          flex: 1;
+          padding: 10px;
+          border: none;
+          border-radius: 6px;
+        }
+        button {
+          background: #10a37f;
+          color: white;
+          border: none;
+          padding: 0 15px;
+          border-radius: 6px;
+          cursor: pointer;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="chat-header">YonatanPT</div>
+        <div id="chat" class="chat-window"></div>
+        <form id="chat-form">
+          <input type="text" id="prompt" placeholder="שאל את YonatanPT כל דבר..." required>
+          <button type="submit">➤</button>
+        </form>
+      </div>
+
+      <script>
+        document.getElementById("chat-form").addEventListener("submit", async function (e) {
+          e.preventDefault();
+          const prompt = document.getElementById("prompt").value.trim();
+          if (!prompt) return;
+
+          addMessage("user", prompt);
+          document.getElementById("prompt").value = "";
+          addMessage("bot", "YonatanPT חושב...");
+
+          try {
+            const res = await fetch("/ask", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ prompt })
+            });
+
+            const data = await res.json();
+            const chatBox = document.getElementById("chat");
+            chatBox.removeChild(chatBox.lastChild); // הסר "חושב..."
+            addMessage("bot", data.response);
+          } catch {
+            addMessage("bot", "אירעה שגיאה. נסה שוב.");
+          }
+        });
+
+        function addMessage(role, text) {
+          const chat = document.getElementById("chat");
+          const div = document.createElement("div");
+          div.className = \`message \${role}\`;
+          div.innerText = text;
+          chat.appendChild(div);
+          chat.scrollTop = chat.scrollHeight;
+        }
+      </script>
+    </body>
+    </html>
+  `);
+});
+
+// נקודת API
+app.post("/ask", async (req, res) => {
+  const { prompt } = req.body;
+
+  try {
+    const completion = await openai.createChatCompletion({
+      model: "gpt-3.5-turbo",
+      messages: [{ role: "user", content: prompt }],
+    });
+
+    res.json({ response: completion.data.choices[0].message.content });
+  } catch (err) {
+    console.error("שגיאה:", err.message);
+    res.status(500).json({ response: "שגיאה - נסה שוב מאוחר יותר." });
+  }
+});
+
+app.listen(3000, () => {
+  console.log("✅ YonatanPT רץ בכתובת http://localhost:3000");
+});
