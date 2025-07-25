@@ -1,104 +1,121 @@
-<!-- public/index.html -->
 <!DOCTYPE html>
-<html lang="he">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>YonatanPT</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YonatanPT - Chat</title>
   <style>
     body {
-      background-color: #1e1e2f;
-      color: white;
-      font-family: Arial, sans-serif;
       margin: 0;
-      height: 100vh;
+      font-family: Arial, sans-serif;
+      background-color: #343541;
+      color: #fff;
       display: flex;
       flex-direction: column;
+      height: 100vh;
     }
     header {
-      background: #2c2c3d;
       padding: 1rem;
+      background-color: #202123;
       text-align: center;
       font-size: 1.5rem;
+      font-weight: bold;
     }
     #chat {
-      flex: 1;
+      flex-grow: 1;
       overflow-y: auto;
       padding: 1rem;
     }
-    .msg {
-      max-width: 60%;
-      margin: 10px;
-      padding: 10px;
+    .message {
+      margin-bottom: 1rem;
+      padding: 0.5rem 1rem;
       border-radius: 10px;
+      max-width: 80%;
     }
     .user {
-      background-color: #007acc;
-      margin-left: auto;
+      background-color: #2b2c2f;
+      align-self: flex-end;
+      text-align: right;
     }
     .bot {
-      background-color: #444;
-      margin-right: auto;
+      background-color: #444654;
+      align-self: flex-start;
     }
-    #inputBox {
+    #inputContainer {
       display: flex;
-      border-top: 1px solid #333;
+      padding: 1rem;
+      background-color: #202123;
     }
-    #input {
+    input {
       flex: 1;
-      padding: 1rem;
+      padding: 0.75rem;
       border: none;
-      background: #2e2e3e;
-      color: white;
+      border-radius: 8px;
+      font-size: 1rem;
     }
-    #sendBtn {
-      padding: 1rem;
-      background-color: #007acc;
-      color: white;
+    button {
+      margin-left: 1rem;
+      padding: 0.75rem 1rem;
+      background-color: #10a37f;
       border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <header>YonatanPT</header>
+  <header>YonatanPT Chat</header>
   <div id="chat"></div>
-  <div id="inputBox">
-    <input id="input" placeholder="שאל משהו...">
-    <button id="sendBtn">שלח</button>
+  <div id="inputContainer">
+    <input type="text" id="userInput" placeholder="שאל אותי משהו..." />
+    <button onclick="sendMessage()">שלח</button>
   </div>
 
   <script>
-    const chat = document.getElementById('chat');
-    const input = document.getElementById('input');
-    const sendBtn = document.getElementById('sendBtn');
+    const apiKey = "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";
 
-    function append(message, sender) {
-      const div = document.createElement('div');
-      div.className = `msg ${sender}`;
-      div.textContent = message;
-      chat.appendChild(div);
-      chat.scrollTop = chat.scrollHeight;
-    }
+    async function sendMessage() {
+      const input = document.getElementById("userInput");
+      const message = input.value.trim();
+      if (!message) return;
 
-    async function send() {
-      const text = input.value.trim();
-      if (!text) return;
-      append(text, 'user');
-      input.value = '';
+      addMessage("user", message);
+      input.value = "";
 
-      const res = await fetch('/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text }),
+      addMessage("bot", "חושב...");
+
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [{ role: "user", content: message }]
+        })
       });
 
-      const data = await res.json();
-      append(data.reply, 'bot');
+      const data = await response.json();
+      const botMessage = data.choices?.[0]?.message?.content || "תקלה! נסה שוב מאוחר יותר.";
+
+      // הסר את הודעת "חושב..."
+      const chat = document.getElementById("chat");
+      chat.removeChild(chat.lastChild);
+
+      addMessage("bot", botMessage);
     }
 
-    sendBtn.onclick = send;
-    input.addEventListener('keydown', e => {
-      if (e.key === 'Enter') send();
-    });
+    function addMessage(role, text) {
+      const chat = document.getElementById("chat");
+      const msg = document.createElement("div");
+      msg.className = `message ${role}`;
+      msg.textContent = text;
+      chat.appendChild(msg);
+      chat.scrollTop = chat.scrollHeight;
+    }
   </script>
 </body>
 </html>
