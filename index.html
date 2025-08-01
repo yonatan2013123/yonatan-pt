@@ -126,6 +126,27 @@
             background: #128C7E;
             box-shadow: 0 0 15px rgba(37, 211, 102, 0.8);
         }
+        .back-to-chat-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            width: 100%;
+            box-sizing: border-box;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+        .back-to-chat-button:hover {
+            background: #0056b3;
+            box-shadow: 0 0 15px rgba(0, 123, 255, 0.8);
+        }
 
         /* --- Chat Container Styles --- */
         .chat-container {
@@ -271,6 +292,14 @@
             <button type="submit">התחבר</button>
         </form>
 
+        <div id="registration-success" class="hidden">
+            <p style="text-align: center; font-size: 1.1rem; color: #00f0ff;">
+                מעולה! פרטי ההרשמה נשלחו בוואטסאפ.
+                לאחר אישור, לחץ על הכפתור למטה כדי להיכנס.
+            </p>
+            <a id="back-to-chat-button" class="back-to-chat-button" href="#" onclick="handleLoginAfterRegistration()">חזור לצ'אט</a>
+        </div>
+
         <div id="register-container" class="hidden">
             <form id="register-form">
                 <input type="text" id="register-username" placeholder="בחר שם משתמש" required>
@@ -312,10 +341,10 @@
         const chatTitle = document.getElementById('chat-title');
         const authSwitchLink = document.querySelector('.auth-switch');
         const whatsappButton = document.getElementById('send-whatsapp');
+        const registrationSuccessDiv = document.getElementById('registration-success');
 
         let currentUsername = null;
         const whatsappNumber = "972559528533";
-        const chatUrl = "http://YOUR_CHAT_URL"; // *** יש להחליף בכתובת האתר שלך (או בנתיב לקובץ index.html) ***
         
         // --- API Configuration ---
         const apiKey = "AIzaSyC_2o3J1v16RA4b79JZ1Csdbv4N6Zl9LGw";
@@ -329,6 +358,7 @@
                 authTitle.textContent = 'הרשמה';
                 authSwitchLink.textContent = 'יש לך כבר חשבון? התחבר';
                 loginForm.classList.add('hidden');
+                registrationSuccessDiv.classList.add('hidden');
                 registerContainer.classList.remove('hidden');
             } else {
                 authContainer.setAttribute('data-mode', 'login');
@@ -336,6 +366,7 @@
                 authSwitchLink.textContent = 'אין לך חשבון? הירשם';
                 loginForm.classList.remove('hidden');
                 registerContainer.classList.add('hidden');
+                registrationSuccessDiv.classList.add('hidden');
             }
             authError.classList.remove('visible');
             authError.textContent = '';
@@ -362,8 +393,10 @@
                 return;
             }
 
+            // Store user details in session storage temporarily to be used for the WhatsApp message
             sessionStorage.setItem('tempUserDetails', JSON.stringify({ username, password, email }));
 
+            // Hide the registration form and show the WhatsApp button
             registerForm.classList.add('hidden');
             whatsappButton.classList.remove('hidden');
             authSwitchLink.classList.add('hidden');
@@ -381,17 +414,32 @@
             }
             const { username, password, email } = JSON.parse(tempUserDetails);
 
-            // Create a clear and helpful message for the admin
-            const message = `שלום, נרשמתי לצ'אט בוט עם הפרטים הבאים:\nשם משתמש: ${username}\nסיסמה: ${password}\nמייל: ${email}\n\n*לאחר האישור, אנא חזור/י לאתר להתחברות:*\n${chatUrl}`;
+            const message = `שלום, נרשמתי לצ'אט בוט עם הפרטים הבאים:\nשם משתמש: ${username}\nסיסמה: ${password}\nמייל: ${email}\n\nאנא אשר את המשתמש שלי.`;
             const encodedMessage = encodeURIComponent(message);
             window.open(`https://wa.me/${whatsappNumber}?text=${encodedMessage}`, '_blank');
             
-            // Assuming the user will be approved, save their details locally
+            // Save user to local storage and move to success screen
             const users = JSON.parse(localStorage.getItem('chat_users')) || {};
             users[username] = { password: password, email: email };
             localStorage.setItem('chat_users', JSON.stringify(users));
 
-            // Log in the user immediately to show them the chat interface
+            // Hide WhatsApp button and show the new "Back to Chat" message
+            registerContainer.classList.add('hidden');
+            whatsappButton.classList.add('hidden');
+            authSwitchLink.classList.add('hidden');
+            registrationSuccessDiv.classList.remove('hidden');
+            authTitle.textContent = 'שלח והתחבר';
+            authError.classList.remove('visible');
+        }
+
+        function handleLoginAfterRegistration() {
+            const tempUserDetails = sessionStorage.getItem('tempUserDetails');
+            if (!tempUserDetails) {
+                // If there's no temporary user, go back to the login screen
+                handleLogout();
+                return;
+            }
+            const { username } = JSON.parse(tempUserDetails);
             loginUser(username);
         }
 
