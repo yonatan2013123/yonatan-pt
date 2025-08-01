@@ -17,11 +17,11 @@
             align-items: center;
             min-height: 100vh;
         }
-       .hidden {
+        .hidden {
             display: none!important;
         }
         /* --- Auth Container Styles --- */
-       .auth-container {
+        .auth-container {
             width: 90%;
             max-width: 400px;
             background: rgba(40, 40, 40, 0.7);
@@ -32,19 +32,19 @@
             border: 1px solid #3d3d3d;
             transition: all 0.5s ease;
         }
-       .auth-container h2 {
+        .auth-container h2 {
             text-align: center;
             color: #00f0ff;
             margin-bottom: 25px;
             font-size: 2rem;
             transition: all 0.5s ease;
         }
-       .auth-container form {
+        .auth-container form {
             display: flex;
             flex-direction: column;
             gap: 15px;
         }
-       .auth-container form input {
+        .auth-container form input {
             width: 100%;
             box-sizing: border-box;
             padding: 15px;
@@ -55,12 +55,12 @@
             font-size: 1rem;
             transition: all 0.3s ease;
         }
-       .auth-container form input:focus {
+        .auth-container form input:focus {
             outline: none;
             border-color: #00ffff;
             box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
         }
-       .auth-container form button {
+        .auth-container form button {
             width: 100%;
             background: #00f0ff;
             color: #1a1a1a;
@@ -73,11 +73,11 @@
             transition: all 0.3s ease;
             letter-spacing: 1px;
         }
-       .auth-container form button:hover {
+        .auth-container form button:hover {
             background: #00ffff;
             box-shadow: 0 0 15px rgba(0, 240, 255, 0.8);
         }
-       .auth-switch {
+        .auth-switch {
             text-align: center;
             margin-top: 20px;
             cursor: pointer;
@@ -86,11 +86,11 @@
             font-size: 0.9rem;
             transition: color 0.3s ease;
         }
-       .auth-switch:hover {
+        .auth-switch:hover {
             color: #00ffff;
             text-decoration: underline;
         }
-       .auth-error {
+        .auth-error {
             color: #ff4d4d;
             text-align: center;
             margin-bottom: 15px;
@@ -100,13 +100,13 @@
             overflow: hidden;
             transition: all 0.3s ease-in-out;
         }
-       .auth-error.visible {
+        .auth-error.visible {
             visibility: visible;
             height: auto;
             margin-bottom: 15px;
         }
         /* --- Chat Container Styles --- */
-       .chat-container {
+        .chat-container {
             width: 90%;
             max-width: 800px;
             background: rgba(40, 40, 40, 0.7);
@@ -119,7 +119,7 @@
             overflow: hidden;
             height: 90vh;
         }
-       .chat-header {
+        .chat-header {
             padding: 15px;
             background: rgba(30, 30, 30, 0.8);
             border-bottom: 1px solid #4a4a4a;
@@ -128,7 +128,7 @@
             justify-content: space-between;
             align-items: center;
         }
-       .chat-header h1 {
+        .chat-header h1 {
             margin: 0;
             font-size: 1.6rem;
             color: #00f0ff;
@@ -160,7 +160,7 @@
         #admin-button:hover {
             background: #00cccc;
         }
-       .chat-messages {
+        .chat-messages {
             flex-grow: 1;
             padding: 20px;
             overflow-y: auto;
@@ -168,7 +168,7 @@
             flex-direction: column;
             gap: 15px;
         }
-       .message {
+        .message {
             max-width: 80%;
             padding: 12px 18px;
             border-radius: 20px;
@@ -180,24 +180,25 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-       .message.user {
+        .message.user {
             background: #007bff;
             align-self: flex-end;
             color: white;
             border-bottom-right-radius: 5px;
         }
-       .message.bot {
+        .message.bot {
             background: #2a2a2a;
             align-self: flex-start;
             border-bottom-left-radius: 5px;
         }
-       .chat-input {
+        .chat-input {
             display: flex;
             padding: 15px;
             border-top: 1px solid #4a4a4a;
             background: rgba(30, 30, 30, 0.8);
+            align-items: center;
         }
-       .chat-input input {
+        .chat-input input {
             flex-grow: 1;
             padding: 15px;
             border-radius: 50px;
@@ -205,17 +206,17 @@
             background: #1a1a1a;
             color: #e0e0e0;
             font-size: 1rem;
-            margin-left: 10px;
+            margin-right: 10px;
             transition: all 0.3s ease;
         }
-       .chat-input input:focus {
+        .chat-input input:focus {
             outline: none;
             box-shadow: 0 0 8px #00f0ff;
         }
-       .chat-input input::placeholder {
+        .chat-input input::placeholder {
             color: #777;
         }
-       .chat-input button {
+        .chat-input button {
             background: #00f0ff;
             color: #1a1a1a;
             border: none;
@@ -226,24 +227,53 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
-       .chat-input button:hover {
+        .chat-input button:hover {
             box-shadow: 0 0 10px #00f0ff;
             transform: scale(1.05);
         }
-       .typing-indicator {
+
+        /* NEW: Voice Chat Button Styling */
+        #voice-input-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            color: #00f0ff;
+            font-size: 1.5rem;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+        #voice-input-button:hover {
+            color: #00ffff;
+            transform: scale(1.1);
+        }
+        #voice-input-button.listening {
+            color: #ff4d4d;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .typing-indicator {
             align-self: flex-start;
             background: #2a2a2a;
             padding: 12px 18px;
             border-radius: 20px;
             font-style: normal;
         }
-       .typing-indicator span {
+        .typing-indicator span {
             animation: typing-dots 1s infinite;
             opacity: 0;
             display: inline-block;
         }
-       .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-       .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
         @keyframes typing-dots {
             0%, 80%, 100% { opacity: 0; }
             40% { opacity: 1; }
@@ -294,6 +324,21 @@
         #close-admin-panel {
             background: #ff4d4d;
         }
+        #user-list {
+            text-align: right;
+            margin-top: 10px;
+        }
+        #user-list ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        #user-list li {
+            background: #1a1a1a;
+            border: 1px solid #4a4a4a;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body>
@@ -329,6 +374,7 @@
         <div class="chat-messages" id="chatMessages">
         </div>
         <div class="chat-input">
+            <button id="voice-input-button" title="התחל צ'אט קולי">🎙️</button>
             <input type="text" id="userInput" placeholder="אני מקשיב..." onkeydown="handleKey(event)">
             <button onclick="sendMessage()">שלח</button>
         </div>
@@ -341,7 +387,9 @@
             <button id="submit-admin-password">אישור</button>
             <button id="close-admin-panel">סגור</button>
             <div id="admin-content-area" class="hidden">
-                <p>ברוך הבא למנהל. כאן תוכל להציג מידע או לבצע פעולות מנהל.</p>
+                <p>ברוך הבא למנהל. כאן תוכל לראות את כל המשתמשים שנרשמו בדפדפן זה.</p>
+                <button id="show-users-button">הצג משתמשים</button>
+                <div id="user-list"></div>
             </div>
         </div>
     </div>
@@ -365,13 +413,22 @@
         const submitAdminPassword = document.getElementById('submit-admin-password');
         const closeAdminPanelButton = document.getElementById('close-admin-panel');
         const adminContentArea = document.getElementById('admin-content-area');
+        const showUsersButton = document.getElementById('show-users-button');
+        const userListDiv = document.getElementById('user-list');
 
+        // NEW: Voice Chat elements
+        const voiceInputButton = document.getElementById('voice-input-button');
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const SpeechSynthesis = window.speechSynthesis;
+        let isListening = false;
+        let recognition = null;
+        
         let currentUsername = null;
         
         // --- API Configuration ---
-        const apiKey = "AIzaSyC_2o3J1v16RA4b79JZ1Csdbv4N6Zl9LGw"; // אזהרה: מפתח חשוף
+        const apiKey = "AIzaSyDpXgbsbzyzvRKl07E3177hf1xInzsa3c4"; 
         const apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey;
-        const whatsappNumber = "972559528533"; // מספר וואטסאפ, ללא פלוס או מקפים
+        const whatsappNumber = "972559528533";
         const adminPassword = 'qweR2013';
 
         // --- Functions ---
@@ -380,7 +437,6 @@
             registerForm.classList.toggle('hidden');
             loginError.classList.add('hidden');
             registerError.classList.add('hidden');
-            // Update title and switch link text based on current form
             const authTitle = authContainer.querySelector('h2');
             const authSwitch = authContainer.querySelector('.auth-switch');
             if (registerForm.classList.contains('hidden')) {
@@ -411,15 +467,13 @@
                 return;
             }
 
-            users[username] = { password: password, email: email }; // Store user data as an object
+            users[username] = { password: password, email: email };
             localStorage.setItem('chat_users', JSON.stringify(users));
             
-            // Prepare and open WhatsApp message
             const message = `שלום, נרשמתי לצ'אט בוט עם הפרטים הבאים:\nשם משתמש: ${username}\nסיסמה: ${password}\nמייל: ${email}\n\nאנא אשר את המשתמש שלי.`;
             const encodedMessage = encodeURIComponent(message);
             window.open(`https://wa.me/${whatsappNumber}?text=${encodedMessage}`, '_blank');
 
-            // Log in the user after preparing the WhatsApp message
             loginUser(username);
         }
 
@@ -442,7 +496,7 @@
 
         function loginUser(username) {
             currentUsername = username;
-            sessionStorage.setItem('loggedInUser', username); // Use session storage for login state
+            sessionStorage.setItem('loggedInUser', username);
             
             authContainer.classList.add('hidden');
             chatContainer.classList.remove('hidden');
@@ -460,7 +514,6 @@
             chatContainer.classList.add('hidden');
             authContainer.classList.remove('hidden');
             
-            // Clear chat view and reset auth container to login form
             chatMessages.innerHTML = '';
             loginForm.classList.remove('hidden');
             registerForm.classList.add('hidden');
@@ -478,14 +531,13 @@
         }
 
         function loadChatHistory(username) {
-            chatMessages.innerHTML = ''; // Clear previous messages
+            chatMessages.innerHTML = '';
             const history = localStorage.getItem(`chatHistory_${username}`);
             if (history) {
                 const messages = JSON.parse(history);
                 messages.forEach(msg => {
                     const messageDiv = document.createElement('div');
                     messageDiv.classList.add('message', msg.sender);
-                    // Handle multiline text
                     messageDiv.innerText = msg.text;
                     chatMessages.append(messageDiv);
                 });
@@ -501,8 +553,18 @@
             localStorage.setItem(historyKey, JSON.stringify(history));
         }
 
-        async function sendMessage() {
-            const userText = userInput.value.trim();
+        // NEW: Function to make the bot "speak"
+        function speakText(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'he-IL'; // Set language to Hebrew for better pronunciation
+            SpeechSynthesis.speak(utterance);
+        }
+
+        async function sendMessage(userText = null) {
+            if (!userText) {
+                userText = userInput.value.trim();
+            }
+
             if (userText === '') return;
 
             const userMessageDiv = document.createElement('div');
@@ -527,7 +589,7 @@
                 chatMessages.append(botMessageDiv);
                 saveChatHistory('bot', botResponse);
                 botMessageDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
+                speakText(botResponse); // NEW: Speak the response
             } else {
                 const typingIndicator = document.createElement('div');
                 typingIndicator.classList.add('message', 'typing-indicator');
@@ -559,20 +621,18 @@
     
                     const botMessageDiv = document.createElement('div');
                     botMessageDiv.classList.add('message', 'bot');
-                    botMessageDiv.innerText = botResponse; // Use innerText to correctly render newlines
+                    botMessageDiv.innerText = botResponse;
                     chatMessages.append(botMessageDiv);
                     saveChatHistory('bot', botResponse);
-
-                    // *** NEW SCROLL BEHAVIOR ***
-                    // Scrolls to the beginning of the bot's message
                     botMessageDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
+                    speakText(botResponse); // NEW: Speak the response
                 } catch (error) {
                     chatMessages.removeChild(typingIndicator);
                     const errorDiv = document.createElement('div');
                     errorDiv.classList.add('message', 'bot');
                     errorDiv.textContent = 'אירעה שגיאה: ' + error.message;
                     chatMessages.append(errorDiv);
+                    speakText('אירעה שגיאה, אנא נסה שוב.'); // NEW: Speak the error
                 }
             }
         }
@@ -582,8 +642,75 @@
                 sendMessage();
             }
         }
+        
+        // NEW: Voice Chat Functions
+        function startVoiceChat() {
+            if (!SpeechRecognition) {
+                alert("הדפדפן שלך לא תומך בזיהוי דיבור.");
+                return;
+            }
+
+            if (isListening) {
+                recognition.stop();
+                return;
+            }
+
+            recognition = new SpeechRecognition();
+            recognition.lang = 'he-IL';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            recognition.onstart = function() {
+                isListening = true;
+                voiceInputButton.classList.add('listening');
+                console.log("הקשבה החלה...");
+            };
+
+            recognition.onresult = function(event) {
+                const speechResult = event.results[0][0].transcript;
+                userInput.value = speechResult;
+                sendMessage(speechResult);
+            };
+
+            recognition.onerror = function(event) {
+                console.error("שגיאת זיהוי דיבור: " + event.error);
+                voiceInputButton.classList.remove('listening');
+                isListening = false;
+            };
+
+            recognition.onend = function() {
+                isListening = false;
+                voiceInputButton.classList.remove('listening');
+                console.log("הקשבה הסתיימה.");
+            };
+
+            recognition.start();
+        }
 
         // --- Admin panel logic ---
+        function showRegisteredUsers() {
+            const users = JSON.parse(localStorage.getItem('chat_users')) || {};
+            userListDiv.innerHTML = '';
+            
+            if (Object.keys(users).length === 0) {
+                userListDiv.innerHTML = '<p>אין משתמשים רשומים בדפדפן זה.</p>';
+                return;
+            }
+
+            const list = document.createElement('ul');
+            for (const username in users) {
+                const user = users[username];
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                    <strong>שם משתמש:</strong> ${username}<br>
+                    <strong>מייל:</strong> ${user.email}<br>
+                    <strong>סיסמה:</strong> ${user.password}
+                `;
+                list.appendChild(listItem);
+            }
+            userListDiv.appendChild(list);
+        }
+
         adminButton.addEventListener('click', () => {
             adminPanel.classList.remove('hidden');
             adminPasswordInput.value = '';
@@ -595,6 +722,7 @@
             if (adminPasswordInput.value === adminPassword) {
                 adminPasswordInput.style.borderColor = '#00ff00';
                 adminContentArea.classList.remove('hidden');
+                showRegisteredUsers();
             } else {
                 adminPasswordInput.style.borderColor = '#ff4d4d';
                 alert('סיסמה שגויה!');
@@ -606,10 +734,13 @@
             adminPasswordInput.style.borderColor = '#00f0ff';
         });
 
+        showUsersButton.addEventListener('click', showRegisteredUsers);
+
         // --- Event Listeners ---
         loginForm.addEventListener('submit', handleLogin);
         registerForm.addEventListener('submit', handleRegistration);
         logoutButton.addEventListener('click', handleLogout);
+        voiceInputButton.addEventListener('click', startVoiceChat); // NEW: Listen for voice button click
 
         // --- Initial Load ---
         checkLoginState();
