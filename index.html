@@ -30,49 +30,101 @@
             box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(10px);
             border: 1px solid #3d3d3d;
+            transition: all 0.5s ease;
+            position: relative;
         }
         .auth-container h2 {
             text-align: center;
             color: #00f0ff;
             margin-bottom: 25px;
+            font-size: 2rem;
+            transition: all 0.5s ease;
+        }
+        .auth-container form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
         .auth-container form input {
             width: 100%;
             box-sizing: border-box;
             padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 50px;
+            border-radius: 10px;
             border: 1px solid #00f0ff;
             background: #1a1a1a;
             color: #e0e0e0;
             font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .auth-container form input:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
         }
         .auth-container form button {
             width: 100%;
             background: #00f0ff;
             color: #1a1a1a;
             border: none;
-            border-radius: 50px;
+            border-radius: 10px;
             padding: 15px;
             font-size: 1.2rem;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
+            letter-spacing: 1px;
         }
         .auth-container form button:hover {
-            box-shadow: 0 0 10px #00f0ff;
+            background: #00ffff;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.8);
         }
         .auth-switch {
             text-align: center;
             margin-top: 20px;
             cursor: pointer;
             color: #00f0ff;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+        .auth-switch:hover {
+            color: #00ffff;
             text-decoration: underline;
         }
         .auth-error {
             color: #ff4d4d;
             text-align: center;
             margin-bottom: 15px;
+            font-size: 0.9rem;
+            visibility: hidden;
+            height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease-in-out;
+        }
+        .auth-error.visible {
+            visibility: visible;
+            height: auto;
+            margin-bottom: 15px;
+        }
+        .whatsapp-button {
+            background: #25D366;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            width: 100%;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+        .whatsapp-button:hover {
+            background: #128C7E;
+            box-shadow: 0 0 15px rgba(37, 211, 102, 0.8);
         }
 
         /* --- Chat Container Styles --- */
@@ -112,6 +164,10 @@
             padding: 5px 10px;
             cursor: pointer;
             font-size: 0.9rem;
+            transition: background-color 0.3s ease;
+        }
+        #logout-button:hover {
+            background: #e60000;
         }
         .chat-messages {
             flex-grow: 1;
@@ -135,14 +191,14 @@
         }
         .message.user {
             background: #007bff;
-            align-self: flex-end; /* Changed to flex-end for RTL */
+            align-self: flex-end;
             color: white;
-            border-bottom-right-radius: 5px; /* Changed for RTL */
+            border-bottom-right-radius: 5px;
         }
         .message.bot {
             background: #2a2a2a;
-            align-self: flex-start; /* Changed to flex-start for RTL */
-            border-bottom-left-radius: 5px; /* Changed for RTL */
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
         }
         .chat-input {
             display: flex;
@@ -184,7 +240,7 @@
             transform: scale(1.05);
         }
         .typing-indicator {
-            align-self: flex-start; /* Changed for RTL */
+            align-self: flex-start;
             background: #2a2a2a;
             padding: 12px 18px;
             border-radius: 20px;
@@ -205,24 +261,27 @@
 </head>
 <body>
 
-    <div id="auth-container">
+    <div class="auth-container" data-mode="login">
+        <h2 id="auth-title">התחברות</h2>
+        <div id="auth-error" class="auth-error"></div>
+
         <form id="login-form">
-            <h2>התחברות</h2>
-            <div id="login-error" class="auth-error hidden"></div>
             <input type="text" id="login-username" placeholder="שם משתמש" required>
             <input type="password" id="login-password" placeholder="סיסמה" required>
             <button type="submit">התחבר</button>
-            <p class="auth-switch" onclick="toggleForms()">אין לך חשבון? הירשם</p>
         </form>
 
-        <form id="register-form" class="hidden">
-            <h2>הרשמה</h2>
-            <div id="register-error" class="auth-error hidden"></div>
-            <input type="text" id="register-username" placeholder="בחר שם משתמש" required>
-            <input type="password" id="register-password" placeholder="בחר סיסמה" required>
-            <button type="submit">הירשם</button>
-            <p class="auth-switch" onclick="toggleForms()">יש לך כבר חשבון? התחבר</p>
-        </form>
+        <div id="register-container" class="hidden">
+            <form id="register-form">
+                <input type="text" id="register-username" placeholder="בחר שם משתמש" required>
+                <input type="email" id="register-email" placeholder="הכנס כתובת מייל" required>
+                <input type="password" id="register-password" placeholder="בחר סיסמה" required>
+                <button type="submit">הירשם</button>
+            </form>
+            <a id="send-whatsapp" class="whatsapp-button hidden" onclick="sendWhatsAppMessage()">לחץ כאן כדי לשלוח את פרטי ההרשמה בוואטסאפ</a>
+        </div>
+        
+        <a class="auth-switch" onclick="toggleForms()">אין לך חשבון? הירשם</a>
     </div>
 
     <div class="chat-container hidden" id="chat-container">
@@ -240,48 +299,99 @@
 
     <script>
         // DOM Elements
-        const authContainer = document.getElementById('auth-container');
+        const authContainer = document.querySelector('.auth-container');
+        const authTitle = document.getElementById('auth-title');
+        const authError = document.getElementById('auth-error');
         const chatContainer = document.getElementById('chat-container');
         const loginForm = document.getElementById('login-form');
         const registerForm = document.getElementById('register-form');
-        const loginError = document.getElementById('login-error');
-        const registerError = document.getElementById('register-error');
+        const registerContainer = document.getElementById('register-container');
         const chatMessages = document.getElementById('chatMessages');
         const userInput = document.getElementById('userInput');
         const logoutButton = document.getElementById('logout-button');
         const chatTitle = document.getElementById('chat-title');
+        const authSwitchLink = document.querySelector('.auth-switch');
+        const whatsappButton = document.getElementById('send-whatsapp');
 
         let currentUsername = null;
+        const whatsappNumber = "972559528533";
         
         // --- API Configuration ---
-        const apiKey = "AIzaSyC_2o3J1v16RA4b79JZ1Csdbv4N6Zl9LGw"; // אזהרה: מפתח חשוף
+        const apiKey = "AIzaSyC_2o3J1v16RA4b79JZ1Csdbv4N6Zl9LGw";
         const apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey;
 
         // --- Functions ---
-
         function toggleForms() {
-            loginForm.classList.toggle('hidden');
-            registerForm.classList.toggle('hidden');
-            loginError.classList.add('hidden');
-            registerError.classList.add('hidden');
+            const isLoginMode = authContainer.getAttribute('data-mode') === 'login';
+            if (isLoginMode) {
+                authContainer.setAttribute('data-mode', 'register');
+                authTitle.textContent = 'הרשמה';
+                authSwitchLink.textContent = 'יש לך כבר חשבון? התחבר';
+                loginForm.classList.add('hidden');
+                registerContainer.classList.remove('hidden');
+            } else {
+                authContainer.setAttribute('data-mode', 'login');
+                authTitle.textContent = 'התחברות';
+                authSwitchLink.textContent = 'אין לך חשבון? הירשם';
+                loginForm.classList.remove('hidden');
+                registerContainer.classList.add('hidden');
+            }
+            authError.classList.remove('visible');
+            authError.textContent = '';
+        }
+
+        function displayError(message) {
+            authError.textContent = message;
+            authError.classList.add('visible');
         }
 
         function handleRegistration(event) {
             event.preventDefault();
             const username = document.getElementById('register-username').value.trim();
             const password = document.getElementById('register-password').value;
-            if (!username || !password) return;
-
-            const users = JSON.parse(localStorage.getItem('chat_users')) || {};
-
-            if (users[username]) {
-                registerError.textContent = 'שם המשתמש כבר קיים.';
-                registerError.classList.remove('hidden');
+            const email = document.getElementById('register-email').value.trim();
+            if (!username || !password || !email) {
+                displayError('אנא מלא את כל השדות.');
                 return;
             }
 
-            users[username] = password; // אזהרה: שמירת סיסמה בצורה לא מאובטחת
+            const users = JSON.parse(localStorage.getItem('chat_users')) || {};
+            if (users[username]) {
+                displayError('שם המשתמש כבר קיים.');
+                return;
+            }
+
+            // Store user details in session storage temporarily to be used for the WhatsApp message
+            sessionStorage.setItem('tempUserDetails', JSON.stringify({ username, password, email }));
+
+            // Hide the registration form and show the WhatsApp button
+            registerForm.classList.add('hidden');
+            whatsappButton.classList.remove('hidden');
+            authSwitchLink.classList.add('hidden');
+
+            authTitle.textContent = 'כמעט סיימנו!';
+            authError.textContent = 'כדי להשלים את ההרשמה, אנא לחץ על הכפתור כדי לשלוח את פרטיך בוואטסאפ.';
+            authError.classList.add('visible');
+        }
+
+        function sendWhatsAppMessage() {
+            const tempUserDetails = sessionStorage.getItem('tempUserDetails');
+            if (!tempUserDetails) {
+                displayError('אירעה שגיאה. אנא נסה להירשם שוב.');
+                return;
+            }
+            const { username, password, email } = JSON.parse(tempUserDetails);
+
+            const message = `שלום, נרשמתי לצ'אט בוט עם הפרטים הבאים:\nשם משתמש: ${username}\nסיסמה: ${password}\nמייל: ${email}\nאנא אשר את המשתמש שלי.`;
+            const encodedMessage = encodeURIComponent(message);
+            window.open(`https://wa.me/${whatsappNumber}?text=${encodedMessage}`, '_blank');
+            
+            // Assuming approval, save the user to local storage and log them in
+            const users = JSON.parse(localStorage.getItem('chat_users')) || {};
+            users[username] = { password: password, email: email };
             localStorage.setItem('chat_users', JSON.stringify(users));
+
+            // Log in the user after sending the message
             loginUser(username);
         }
 
@@ -289,40 +399,46 @@
             event.preventDefault();
             const username = document.getElementById('login-username').value.trim();
             const password = document.getElementById('login-password').value;
-            if (!username || !password) return;
+            if (!username || !password) {
+                displayError('אנא מלא את כל השדות.');
+                return;
+            }
             
             const users = JSON.parse(localStorage.getItem('chat_users')) || {};
-
-            if (users[username] && users[username] === password) {
+            const user = users[username];
+            
+            if (user && user.password === password) {
                 loginUser(username);
             } else {
-                loginError.textContent = 'שם המשתמש או הסיסמה שגויים.';
-                loginError.classList.remove('hidden');
+                displayError('שם המשתמש או הסיסמה שגויים.');
             }
         }
 
         function loginUser(username) {
             currentUsername = username;
-            sessionStorage.setItem('loggedInUser', username); // Use session storage for login state
-            
+            sessionStorage.setItem('loggedInUser', username);
+            sessionStorage.removeItem('tempUserDetails');
+
             authContainer.classList.add('hidden');
             chatContainer.classList.remove('hidden');
-            
             chatTitle.textContent = `הצ'אט של ${username}`;
             document.title = `צ'אט - ${username}`;
-            
             loadChatHistory(username);
         }
 
         function handleLogout() {
             currentUsername = null;
             sessionStorage.removeItem('loggedInUser');
+            sessionStorage.removeItem('tempUserDetails');
 
             chatContainer.classList.add('hidden');
             authContainer.classList.remove('hidden');
             
-            // Clear chat view
             chatMessages.innerHTML = '';
+            registerForm.classList.remove('hidden');
+            whatsappButton.classList.add('hidden');
+            authSwitchLink.classList.remove('hidden');
+            toggleForms();
         }
 
         function checkLoginState() {
@@ -333,14 +449,13 @@
         }
 
         function loadChatHistory(username) {
-            chatMessages.innerHTML = ''; // Clear previous messages
+            chatMessages.innerHTML = '';
             const history = localStorage.getItem(`chatHistory_${username}`);
             if (history) {
                 const messages = JSON.parse(history);
                 messages.forEach(msg => {
                     const messageDiv = document.createElement('div');
                     messageDiv.classList.add('message', msg.sender);
-                    // Handle multiline text
                     messageDiv.innerText = msg.text;
                     chatMessages.append(messageDiv);
                 });
@@ -408,12 +523,10 @@
     
                     const botMessageDiv = document.createElement('div');
                     botMessageDiv.classList.add('message', 'bot');
-                    botMessageDiv.innerText = botResponse; // Use innerText to correctly render newlines
+                    botMessageDiv.innerText = botResponse;
                     chatMessages.append(botMessageDiv);
                     saveChatHistory('bot', botResponse);
 
-                    // *** NEW SCROLL BEHAVIOR ***
-                    // Scrolls to the beginning of the bot's message
                     botMessageDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
                 } catch (error) {
@@ -439,7 +552,6 @@
 
         // --- Initial Load ---
         checkLoginState();
-
     </script>
 </body>
 </html>
