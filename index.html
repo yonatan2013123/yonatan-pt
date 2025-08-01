@@ -17,11 +17,11 @@
             align-items: center;
             min-height: 100vh;
         }
-        .hidden {
-            display: none !important;
+       .hidden {
+            display: none!important;
         }
         /* --- Auth Container Styles --- */
-        .auth-container {
+       .auth-container {
             width: 90%;
             max-width: 400px;
             background: rgba(40, 40, 40, 0.7);
@@ -33,19 +33,19 @@
             transition: all 0.5s ease;
             position: relative;
         }
-        .auth-container h2 {
+       .auth-container h2 {
             text-align: center;
             color: #00f0ff;
             margin-bottom: 25px;
             font-size: 2rem;
             transition: all 0.5s ease;
         }
-        .auth-container form {
+       .auth-container form {
             display: flex;
             flex-direction: column;
             gap: 15px;
         }
-        .auth-container form input {
+       .auth-container form input {
             width: 100%;
             box-sizing: border-box;
             padding: 15px;
@@ -56,12 +56,12 @@
             font-size: 1rem;
             transition: all 0.3s ease;
         }
-        .auth-container form input:focus {
+       .auth-container form input:focus {
             outline: none;
             border-color: #00ffff;
             box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
         }
-        .auth-container form button {
+       .auth-container form button {
             width: 100%;
             background: #00f0ff;
             color: #1a1a1a;
@@ -74,11 +74,11 @@
             transition: all 0.3s ease;
             letter-spacing: 1px;
         }
-        .auth-container form button:hover {
+       .auth-container form button:hover {
             background: #00ffff;
             box-shadow: 0 0 15px rgba(0, 240, 255, 0.8);
         }
-        .auth-switch {
+       .auth-switch {
             text-align: center;
             margin-top: 20px;
             cursor: pointer;
@@ -87,11 +87,11 @@
             font-size: 0.9rem;
             transition: color 0.3s ease;
         }
-        .auth-switch:hover {
+       .auth-switch:hover {
             color: #00ffff;
             text-decoration: underline;
         }
-        .auth-error {
+       .auth-error {
             color: #ff4d4d;
             text-align: center;
             margin-bottom: 15px;
@@ -101,12 +101,12 @@
             overflow: hidden;
             transition: all 0.3s ease-in-out;
         }
-        .auth-error.visible {
+       .auth-error.visible {
             visibility: visible;
             height: auto;
             margin-bottom: 15px;
         }
-        .whatsapp-button {
+       .whatsapp-button {
             background: #25D366;
             color: white;
             border: none;
@@ -122,11 +122,11 @@
             box-sizing: border-box;
             transition: all 0.3s ease;
         }
-        .whatsapp-button:hover {
+       .whatsapp-button:hover {
             background: #128C7E;
             box-shadow: 0 0 15px rgba(37, 211, 102, 0.8);
         }
-        .back-to-chat-button {
+       .back-to-chat-button {
             background: #007bff;
             color: white;
             border: none;
@@ -143,13 +143,13 @@
             margin-top: 15px;
             transition: all 0.3s ease;
         }
-        .back-to-chat-button:hover {
+       .back-to-chat-button:hover {
             background: #0056b3;
             box-shadow: 0 0 15px rgba(0, 123, 255, 0.8);
         }
 
         /* --- Chat Container Styles --- */
-        .chat-container {
+       .chat-container {
             width: 90%;
             max-width: 800px;
             background: rgba(40, 40, 40, 0.7);
@@ -162,7 +162,7 @@
             overflow: hidden;
             height: 90vh;
         }
-        .chat-header {
+       .chat-header {
             padding: 15px;
             background: rgba(30, 30, 30, 0.8);
             border-bottom: 1px solid #4a4a4a;
@@ -171,7 +171,7 @@
             justify-content: space-between;
             align-items: center;
         }
-        .chat-header h1 {
+       .chat-header h1 {
             margin: 0;
             font-size: 1.6rem;
             color: #00f0ff;
@@ -190,7 +190,7 @@
         #logout-button:hover {
             background: #e60000;
         }
-        .chat-messages {
+       .chat-messages {
             flex-grow: 1;
             padding: 20px;
             overflow-y: auto;
@@ -198,7 +198,7 @@
             flex-direction: column;
             gap: 15px;
         }
-        .message {
+       .message {
             max-width: 80%;
             padding: 12px 18px;
             border-radius: 20px;
@@ -210,24 +210,24 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .message.user {
+       .message.user {
             background: #007bff;
             align-self: flex-end;
             color: white;
             border-bottom-right-radius: 5px;
         }
-        .message.bot {
+       .message.bot {
             background: #2a2a2a;
             align-self: flex-start;
             border-bottom-left-radius: 5px;
         }
-        .chat-input {
+       .chat-input {
             display: flex;
             padding: 15px;
             border-top: 1px solid #4a4a4a;
             background: rgba(30, 30, 30, 0.8);
         }
-        .chat-input input {
+       .chat-input input {
             flex-grow: 1;
             padding: 15px;
             border-radius: 50px;
@@ -238,14 +238,14 @@
             margin-left: 10px;
             transition: all 0.3s ease;
         }
-        .chat-input input:focus {
+       .chat-input input:focus {
             outline: none;
             box-shadow: 0 0 8px #00f0ff;
         }
-        .chat-input input::placeholder {
+       .chat-input input::placeholder {
             color: #777;
         }
-        .chat-input button {
+       .chat-input button {
             background: #00f0ff;
             color: #1a1a1a;
             border: none;
@@ -256,24 +256,24 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        .chat-input button:hover {
+       .chat-input button:hover {
             box-shadow: 0 0 10px #00f0ff;
             transform: scale(1.05);
         }
-        .typing-indicator {
+       .typing-indicator {
             align-self: flex-start;
             background: #2a2a2a;
             padding: 12px 18px;
             border-radius: 20px;
             font-style: normal;
         }
-        .typing-indicator span {
+       .typing-indicator span {
             animation: typing-dots 1s infinite;
             opacity: 0;
             display: inline-block;
         }
-        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+       .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+       .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
         @keyframes typing-dots {
             0%, 80%, 100% { opacity: 0; }
             40% { opacity: 1; }
@@ -297,7 +297,7 @@
                 מעולה! פרטי ההרשמה נשלחו בוואטסאפ.
                 לאחר אישור, לחץ על הכפתור למטה כדי להיכנס.
             </p>
-            <button id="back-to-chat-button" class="back-to-chat-button" onclick="handleLoginAfterRegistration()">חזור לצ'אט</button>
+            <button id="back-to-chat-button" class="back-to-chat-button" onclick="handleLoginAfterRegistration()">חזור להתחברות</button>
         </div>
 
         <div id="register-container" class="hidden">
@@ -345,6 +345,10 @@
 
         let currentUsername = null;
         const whatsappNumber = "972559528533";
+        // *** חשוב: החלף את הכתובת הזו בכתובת האמיתית של קובץ ה-HTML שלך! ***
+        // לדוגמה: "file:///C:/Users/YourUser/Desktop/index.html" אם אתה מריץ מקומית,
+        // או "https://your-domain.com/index.html" אם העלית לשרת.
+        const chatUrl = "http://YOUR_CHAT_URL"; 
         
         // --- API Configuration ---
         const apiKey = "AIzaSyC_2o3J1v16RA4b79JZ1Csdbv4N6Zl9LGw";
@@ -382,12 +386,14 @@
             const username = document.getElementById('register-username').value.trim();
             const password = document.getElementById('register-password').value;
             const email = document.getElementById('register-email').value.trim();
-            if (!username || !password || !email) {
+            if (!username ||!password ||!email) {
                 displayError('אנא מלא את כל השדות.');
                 return;
             }
 
-            const users = JSON.parse(localStorage.getItem('chat_users')) || {};
+            const users = JSON.parse(localStorage.getItem('chat_users')) |
+
+| {};
             if (users[username]) {
                 displayError('שם המשתמש כבר קיים.');
                 return;
@@ -414,45 +420,52 @@
             }
             const { username, password, email } = JSON.parse(tempUserDetails);
 
-            const message = `שלום, נרשמתי לצ'אט בוט עם הפרטים הבאים:\nשם משתמש: ${username}\nסיסמה: ${password}\nמייל: ${email}\n\nאנא אשר את המשתמש שלי.`;
+            // Create a clear and helpful message for the admin, including the chat URL
+            const message = `שלום, נרשמתי לצ'אט בוט עם הפרטים הבאים:\nשם משתמש: ${username}\nסיסמה: ${password}\nמייל: ${email}\n\nלאחר האישור, אנא חזור/י לאתר להתחברות:\n${chatUrl}`;
             const encodedMessage = encodeURIComponent(message);
             window.open(`https://wa.me/${whatsappNumber}?text=${encodedMessage}`, '_blank');
             
-            // Save user to local storage and move to success screen
-            const users = JSON.parse(localStorage.getItem('chat_users')) || {};
+            // Save user to local storage (assuming they will be approved)
+            const users = JSON.parse(localStorage.getItem('chat_users')) |
+
+| {};
             users[username] = { password: password, email: email };
             localStorage.setItem('chat_users', JSON.stringify(users));
 
             // Hide WhatsApp button and show the new "Back to Chat" message
             registerContainer.classList.add('hidden');
             whatsappButton.classList.add('hidden');
-            authSwitchLink.classList.add('hidden');
+            authSwitchLink.classList.add('hidden'); // Keep hidden
             registrationSuccessDiv.classList.remove('hidden');
             authTitle.textContent = 'שלח והתחבר';
             authError.classList.remove('visible');
         }
 
         function handleLoginAfterRegistration() {
-            const tempUserDetails = sessionStorage.getItem('tempUserDetails');
-            if (!tempUserDetails) {
-                // If there's no temporary user, go back to the login screen
-                handleLogout();
-                return;
-            }
-            const { username } = JSON.parse(tempUserDetails);
-            loginUser(username);
+            // This function is called when the user clicks "חזור להתחברות"
+            // It simply switches the view back to the login form.
+            authContainer.setAttribute('data-mode', 'login');
+            authTitle.textContent = 'התחברות';
+            authSwitchLink.textContent = 'אין לך חשבון? הירשם';
+            loginForm.classList.remove('hidden');
+            registerContainer.classList.add('hidden'); // Hide the register form container
+            registrationSuccessDiv.classList.add('hidden'); // Hide the success message div
+            authError.classList.remove('visible'); // Clear any error message
+            authSwitchLink.classList.remove('hidden'); // Ensure the switch link is visible
         }
 
         function handleLogin(event) {
             event.preventDefault();
             const username = document.getElementById('login-username').value.trim();
             const password = document.getElementById('login-password').value;
-            if (!username || !password) {
+            if (!username ||!password) {
                 displayError('אנא מלא את כל השדות.');
                 return;
             }
             
-            const users = JSON.parse(localStorage.getItem('chat_users')) || {};
+            const users = JSON.parse(localStorage.getItem('chat_users')) |
+
+| {};
             const user = users[username];
             
             if (user && user.password === password) {
@@ -465,7 +478,7 @@
         function loginUser(username) {
             currentUsername = username;
             sessionStorage.setItem('loggedInUser', username);
-            sessionStorage.removeItem('tempUserDetails');
+            sessionStorage.removeItem('tempUserDetails'); // Clear temporary details after successful login
 
             authContainer.classList.add('hidden');
             chatContainer.classList.remove('hidden');
@@ -483,10 +496,12 @@
             authContainer.classList.remove('hidden');
             
             chatMessages.innerHTML = '';
-            registerForm.classList.remove('hidden');
-            whatsappButton.classList.add('hidden');
-            authSwitchLink.classList.remove('hidden');
-            toggleForms();
+            // Reset auth container to default login view
+            registerForm.classList.remove('hidden'); // Ensure register form is visible if user goes to register
+            whatsappButton.classList.add('hidden'); // Hide whatsapp button
+            authSwitchLink.classList.remove('hidden'); // Show the switch link
+            registrationSuccessDiv.classList.add('hidden'); // Hide success message
+            toggleForms(); // This will reset to login view
         }
 
         function checkLoginState() {
@@ -514,7 +529,7 @@
         function saveChatHistory(sender, text) {
             if (!currentUsername) return;
             const historyKey = `chatHistory_${currentUsername}`;
-            const history = JSON.parse(localStorage.getItem(historyKey)) || [];
+            const history = JSON.parse(localStorage.getItem(historyKey)) ||;
             history.push({ sender: sender, text: text });
             localStorage.setItem(historyKey, JSON.stringify(history));
         }
@@ -558,14 +573,14 @@
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            "contents": [{ "parts": [{ "text": userText }] }]
+                            "contents": }]
                         })
                     });
 
                     if (!response.ok) throw new Error('שגיאה בקבלת תשובה מהשרת.');
 
                     const data = await response.json();
-                    botResponse = data.candidates[0].content.parts[0].text;
+                    botResponse = data.candidates.content.parts.text;
 
                     chatMessages.removeChild(typingIndicator);
     
