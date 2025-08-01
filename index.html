@@ -315,6 +315,7 @@
 
         let currentUsername = null;
         const whatsappNumber = "972559528533";
+        const chatUrl = "http://YOUR_CHAT_URL"; // *** יש להחליף בכתובת האתר שלך ***
         
         // --- API Configuration ---
         const apiKey = "AIzaSyC_2o3J1v16RA4b79JZ1Csdbv4N6Zl9LGw";
@@ -361,10 +362,8 @@
                 return;
             }
 
-            // Store user details in session storage temporarily to be used for the WhatsApp message
             sessionStorage.setItem('tempUserDetails', JSON.stringify({ username, password, email }));
 
-            // Hide the registration form and show the WhatsApp button
             registerForm.classList.add('hidden');
             whatsappButton.classList.remove('hidden');
             authSwitchLink.classList.add('hidden');
@@ -382,16 +381,14 @@
             }
             const { username, password, email } = JSON.parse(tempUserDetails);
 
-            const message = `שלום, נרשמתי לצ'אט בוט עם הפרטים הבאים:\nשם משתמש: ${username}\nסיסמה: ${password}\nמייל: ${email}\nאנא אשר את המשתמש שלי.`;
+            const message = `שלום, נרשמתי לצ'אט בוט עם הפרטים הבאים:\nשם משתמש: ${username}\nסיסמה: ${password}\nמייל: ${email}\n\nלאחר האישור, חזור לצ'אט כאן: ${chatUrl}`;
             const encodedMessage = encodeURIComponent(message);
             window.open(`https://wa.me/${whatsappNumber}?text=${encodedMessage}`, '_blank');
             
-            // Assuming approval, save the user to local storage and log them in
             const users = JSON.parse(localStorage.getItem('chat_users')) || {};
             users[username] = { password: password, email: email };
             localStorage.setItem('chat_users', JSON.stringify(users));
 
-            // Log in the user after sending the message
             loginUser(username);
         }
 
