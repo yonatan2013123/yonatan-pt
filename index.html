@@ -17,6 +17,65 @@
             align-items: center;
             min-height: 100vh;
         }
+        .hidden {
+            display: none !important;
+        }
+        /* --- Auth Container Styles --- */
+        .auth-container {
+            width: 90%;
+            max-width: 400px;
+            background: rgba(40, 40, 40, 0.7);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid #3d3d3d;
+        }
+        .auth-container h2 {
+            text-align: center;
+            color: #00f0ff;
+            margin-bottom: 25px;
+        }
+        .auth-container form input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 50px;
+            border: 1px solid #00f0ff;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            font-size: 1rem;
+        }
+        .auth-container form button {
+            width: 100%;
+            background: #00f0ff;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 50px;
+            padding: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .auth-container form button:hover {
+            box-shadow: 0 0 10px #00f0ff;
+        }
+        .auth-switch {
+            text-align: center;
+            margin-top: 20px;
+            cursor: pointer;
+            color: #00f0ff;
+            text-decoration: underline;
+        }
+        .auth-error {
+            color: #ff4d4d;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        /* --- Chat Container Styles --- */
         .chat-container {
             width: 90%;
             max-width: 800px;
@@ -35,12 +94,24 @@
             background: rgba(30, 30, 30, 0.8);
             border-bottom: 1px solid #4a4a4a;
             text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .chat-header h1 {
             margin: 0;
             font-size: 1.6rem;
             color: #00f0ff;
             text-shadow: 0 0 5px #00f0ff;
+        }
+        #logout-button {
+            background: #ff4d4d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
         }
         .chat-messages {
             flex-grow: 1;
@@ -64,14 +135,14 @@
         }
         .message.user {
             background: #007bff;
-            align-self: flex-start;
+            align-self: flex-end; /* Changed to flex-end for RTL */
             color: white;
-            border-bottom-left-radius: 5px;
+            border-bottom-right-radius: 5px; /* Changed for RTL */
         }
         .message.bot {
             background: #2a2a2a;
-            align-self: flex-end;
-            border-bottom-right-radius: 5px;
+            align-self: flex-start; /* Changed to flex-start for RTL */
+            border-bottom-left-radius: 5px; /* Changed for RTL */
         }
         .chat-input {
             display: flex;
@@ -112,8 +183,8 @@
             box-shadow: 0 0 10px #00f0ff;
             transform: scale(1.05);
         }
-        .typing-indicator.bot {
-            align-self: flex-end;
+        .typing-indicator {
+            align-self: flex-start; /* Changed for RTL */
             background: #2a2a2a;
             padding: 12px 18px;
             border-radius: 20px;
@@ -133,9 +204,31 @@
     </style>
 </head>
 <body>
-    <div class="chat-container">
+
+    <div id="auth-container">
+        <form id="login-form">
+            <h2>התחברות</h2>
+            <div id="login-error" class="auth-error hidden"></div>
+            <input type="text" id="login-username" placeholder="שם משתמש" required>
+            <input type="password" id="login-password" placeholder="סיסמה" required>
+            <button type="submit">התחבר</button>
+            <p class="auth-switch" onclick="toggleForms()">אין לך חשבון? הירשם</p>
+        </form>
+
+        <form id="register-form" class="hidden">
+            <h2>הרשמה</h2>
+            <div id="register-error" class="auth-error hidden"></div>
+            <input type="text" id="register-username" placeholder="בחר שם משתמש" required>
+            <input type="password" id="register-password" placeholder="בחר סיסמה" required>
+            <button type="submit">הירשם</button>
+            <p class="auth-switch" onclick="toggleForms()">יש לך כבר חשבון? התחבר</p>
+        </form>
+    </div>
+
+    <div class="chat-container hidden" id="chat-container">
         <div class="chat-header">
-            <h1>בוט הצ'אט שלך</h1>
+            <button id="logout-button">התנתק</button>
+            <h1 id="chat-title">בוט הצ'אט שלך</h1>
         </div>
         <div class="chat-messages" id="chatMessages">
         </div>
@@ -146,54 +239,122 @@
     </div>
 
     <script>
+        // DOM Elements
+        const authContainer = document.getElementById('auth-container');
+        const chatContainer = document.getElementById('chat-container');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const loginError = document.getElementById('login-error');
+        const registerError = document.getElementById('register-error');
         const chatMessages = document.getElementById('chatMessages');
         const userInput = document.getElementById('userInput');
-        let currentUsername = null; // משתנה גלובלי לשמירת שם המשתמש הנוכחי
+        const logoutButton = document.getElementById('logout-button');
+        const chatTitle = document.getElementById('chat-title');
 
-        // אזהרה: מפתח ה-API חשוף בקוד הלקוח.
-        const apiKey = "AIzaSyC_2o3J1v16RA4b79JZ1Csdbv4N6Zl9LGw";
-        const apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + apiKey;
+        let currentUsername = null;
+        
+        // --- API Configuration ---
+        const apiKey = "AIzaSyC_2o3J1v16RA4b79JZ1Csdbv4N6Zl9LGw"; // אזהרה: מפתח חשוף
+        const apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey;
 
-        function promptForUsername() {
-            let username = localStorage.getItem('lastUsername');
-            if (!username) {
-                username = prompt("בחר שם משתמש כדי להתחיל:");
-                if (username) {
-                    localStorage.setItem('lastUsername', username);
-                }
+        // --- Functions ---
+
+        function toggleForms() {
+            loginForm.classList.toggle('hidden');
+            registerForm.classList.toggle('hidden');
+            loginError.classList.add('hidden');
+            registerError.classList.add('hidden');
+        }
+
+        function handleRegistration(event) {
+            event.preventDefault();
+            const username = document.getElementById('register-username').value.trim();
+            const password = document.getElementById('register-password').value;
+            if (!username || !password) return;
+
+            const users = JSON.parse(localStorage.getItem('chat_users')) || {};
+
+            if (users[username]) {
+                registerError.textContent = 'שם המשתמש כבר קיים.';
+                registerError.classList.remove('hidden');
+                return;
             }
-            if (!username) {
-                username = "אנונימי";
+
+            users[username] = password; // אזהרה: שמירת סיסמה בצורה לא מאובטחת
+            localStorage.setItem('chat_users', JSON.stringify(users));
+            loginUser(username);
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value;
+            if (!username || !password) return;
+            
+            const users = JSON.parse(localStorage.getItem('chat_users')) || {};
+
+            if (users[username] && users[username] === password) {
+                loginUser(username);
+            } else {
+                loginError.textContent = 'שם המשתמש או הסיסמה שגויים.';
+                loginError.classList.remove('hidden');
             }
+        }
+
+        function loginUser(username) {
             currentUsername = username;
-            loadChatHistory(currentUsername);
-            document.title = `בוט צ'אט - ${currentUsername}`;
+            sessionStorage.setItem('loggedInUser', username); // Use session storage for login state
+            
+            authContainer.classList.add('hidden');
+            chatContainer.classList.remove('hidden');
+            
+            chatTitle.textContent = `הצ'אט של ${username}`;
+            document.title = `צ'אט - ${username}`;
+            
+            loadChatHistory(username);
+        }
+
+        function handleLogout() {
+            currentUsername = null;
+            sessionStorage.removeItem('loggedInUser');
+
+            chatContainer.classList.add('hidden');
+            authContainer.classList.remove('hidden');
+            
+            // Clear chat view
+            chatMessages.innerHTML = '';
+        }
+
+        function checkLoginState() {
+            const loggedInUser = sessionStorage.getItem('loggedInUser');
+            if (loggedInUser) {
+                loginUser(loggedInUser);
+            }
         }
 
         function loadChatHistory(username) {
+            chatMessages.innerHTML = ''; // Clear previous messages
             const history = localStorage.getItem(`chatHistory_${username}`);
             if (history) {
                 const messages = JSON.parse(history);
                 messages.forEach(msg => {
                     const messageDiv = document.createElement('div');
                     messageDiv.classList.add('message', msg.sender);
-                    messageDiv.textContent = msg.text;
+                    // Handle multiline text
+                    messageDiv.innerText = msg.text;
                     chatMessages.append(messageDiv);
                 });
             }
-            // גלילה לתחתית השיחה
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
         function saveChatHistory(sender, text) {
-            if (!currentUsername) return; // לא שומר אם אין שם משתמש
-            const history = localStorage.getItem(`chatHistory_${currentUsername}`) ? JSON.parse(localStorage.getItem(`chatHistory_${currentUsername}`)) : [];
+            if (!currentUsername) return;
+            const historyKey = `chatHistory_${currentUsername}`;
+            const history = JSON.parse(localStorage.getItem(historyKey)) || [];
             history.push({ sender: sender, text: text });
-            localStorage.setItem(`chatHistory_${currentUsername}`, JSON.stringify(history));
+            localStorage.setItem(historyKey, JSON.stringify(history));
         }
-
-        // קורא לפונקציה בעת טעינת הדף
-        promptForUsername();
 
         async function sendMessage() {
             const userText = userInput.value.trim();
@@ -201,10 +362,11 @@
 
             const userMessageDiv = document.createElement('div');
             userMessageDiv.classList.add('message', 'user');
-            userMessageDiv.textContent = userText;
+            userMessageDiv.innerText = userText;
             chatMessages.append(userMessageDiv);
             saveChatHistory('user', userText);
             userInput.value = '';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
 
             const creatorKeywords = ["יצר", "בנה", "יוצר", "יונתן", "created", "made"];
             const lowerCaseUserText = userText.toLowerCase();
@@ -216,39 +378,28 @@
                 botResponse = "פותחתי בעזרת יונתן ברקן";
                 const botMessageDiv = document.createElement('div');
                 botMessageDiv.classList.add('message', 'bot');
-                botMessageDiv.textContent = botResponse;
+                botMessageDiv.innerText = botResponse;
                 chatMessages.append(botMessageDiv);
                 saveChatHistory('bot', botResponse);
+                botMessageDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
             } else {
                 const typingIndicator = document.createElement('div');
-                typingIndicator.classList.add('message', 'bot', 'typing-indicator');
+                typingIndicator.classList.add('message', 'typing-indicator');
                 typingIndicator.innerHTML = '<span>.</span><span>.</span><span>.</span>';
                 chatMessages.append(typingIndicator);
-                chatMessages.scrollTop = chatMessages.scrollHeight; // גלילה למטה
+                chatMessages.scrollTop = chatMessages.scrollHeight;
 
                 try {
                     const response = await fetch(apiUrl, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            "contents": [{
-                                "parts": [{
-                                    "text": userText
-                                }]
-                            }]
+                            "contents": [{ "parts": [{ "text": userText }] }]
                         })
                     });
 
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        let errorMessage = 'אירעה שגיאה בשרת. ייתכן שהמפתח לא נכון או שהייתה בעיה בחיבור.';
-                        if (errorData && errorData.error && errorData.error.message) {
-                            errorMessage = 'שגיאה: ' + errorData.error.message;
-                        }
-                        throw new Error(errorMessage);
-                    }
+                    if (!response.ok) throw new Error('שגיאה בקבלת תשובה מהשרת.');
 
                     const data = await response.json();
                     botResponse = data.candidates[0].content.parts[0].text;
@@ -257,20 +408,22 @@
     
                     const botMessageDiv = document.createElement('div');
                     botMessageDiv.classList.add('message', 'bot');
-                    botMessageDiv.textContent = botResponse;
+                    botMessageDiv.innerText = botResponse; // Use innerText to correctly render newlines
                     chatMessages.append(botMessageDiv);
                     saveChatHistory('bot', botResponse);
+
+                    // *** NEW SCROLL BEHAVIOR ***
+                    // Scrolls to the beginning of the bot's message
+                    botMessageDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
                 } catch (error) {
                     chatMessages.removeChild(typingIndicator);
                     const errorDiv = document.createElement('div');
                     errorDiv.classList.add('message', 'bot');
                     errorDiv.textContent = 'אירעה שגיאה: ' + error.message;
                     chatMessages.append(errorDiv);
-                    saveChatHistory('bot', errorDiv.textContent);
-                    console.error('Error fetching from API:', error);
                 }
             }
-            chatMessages.scrollTop = chatMessages.scrollHeight; // גלילה לתחתית לאחר הודעה
         }
 
         function handleKey(event) {
@@ -278,6 +431,15 @@
                 sendMessage();
             }
         }
+
+        // --- Event Listeners ---
+        loginForm.addEventListener('submit', handleLogin);
+        registerForm.addEventListener('submit', handleRegistration);
+        logoutButton.addEventListener('click', handleLogout);
+
+        // --- Initial Load ---
+        checkLoginState();
+
     </script>
 </body>
 </html>
