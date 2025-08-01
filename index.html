@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Chatbot</title>
     <style>
-        /* עיצוב חדש ומגניב */
         body {
             font-family: 'Segoe UI', 'Roboto', sans-serif;
             background: linear-gradient(135deg, #0f0a1e, #2a0b38);
@@ -48,7 +47,7 @@
             padding: 20px;
             overflow-y: auto;
             display: flex;
-            flex-direction: column-reverse;
+            flex-direction: column;
             gap: 15px;
         }
         .message {
@@ -65,14 +64,14 @@
         }
         .message.user {
             background: #007bff;
-            align-self: flex-end;
+            align-self: flex-start;
             color: white;
-            border-bottom-right-radius: 5px;
+            border-bottom-left-radius: 5px;
         }
         .message.bot {
             background: #2a2a2a;
-            align-self: flex-start;
-            border-bottom-left-radius: 5px;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
         }
         .chat-input {
             display: flex;
@@ -114,7 +113,7 @@
             transform: scale(1.05);
         }
         .typing-indicator.bot {
-            align-self: flex-start;
+            align-self: flex-end;
             background: #2a2a2a;
             padding: 12px 18px;
             border-radius: 20px;
@@ -141,7 +140,7 @@
         <div class="chat-messages" id="chatMessages">
         </div>
         <div class="chat-input">
-            <input type="text" id="userInput" placeholder="אני מקשיב..." onkeydown="handleKey(event)">
+            <input type="text" id="userInput" placeholder="כתוב לי משהו..." onkeydown="handleKey(event)">
             <button onclick="sendMessage()">שלח</button>
         </div>
     </div>
@@ -160,55 +159,78 @@
             const userMessageDiv = document.createElement('div');
             userMessageDiv.classList.add('message', 'user');
             userMessageDiv.textContent = userText;
-            chatMessages.prepend(userMessageDiv);
+            chatMessages.append(userMessageDiv);
             userInput.value = '';
 
-            const typingIndicator = document.createElement('div');
-            typingIndicator.classList.add('message', 'bot', 'typing-indicator');
-            typingIndicator.innerHTML = '<span>.</span><span>.</span><span>.</span>';
-            chatMessages.prepend(typingIndicator);
+            const creatorQuestions = [
+                "מי יצר אותך",
+                "מי יצר אותך?",
+                "מי בנה אותך",
+                "מי בנה אותך?",
+                "מי היוצר שלך",
+                "מי היוצר שלך?",
+                "who created you",
+                "who made you",
+                "מי יונתן",
+                "יונתן"
+            ];
+            let isCreatorQuestion = creatorQuestions.some(q => userText.toLowerCase().includes(q));
 
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        "contents": [{
-                            "parts": [{
-                                "text": userText
-                            }]
-                        }]
-                    })
-                });
+            let botResponse;
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    let errorMessage = 'אירעה שגיאה בשרת. ייתכן שהמפתח לא נכון או שהייתה בעיה בחיבור.';
-                    if (errorData && errorData.error && errorData.error.message) {
-                        errorMessage = 'שגיאה: ' + errorData.error.message;
-                    }
-                    throw new Error(errorMessage);
-                }
-
-                const data = await response.json();
-                const botResponse = data.candidates[0].content.parts[0].text;
-
-                chatMessages.removeChild(typingIndicator);
-
+            if (isCreatorQuestion) {
+                botResponse = "אני עובד ומשרת בזכותו של יונתן ברקן המלך!";
                 const botMessageDiv = document.createElement('div');
                 botMessageDiv.classList.add('message', 'bot');
                 botMessageDiv.textContent = botResponse;
-                chatMessages.prepend(botMessageDiv);
+                chatMessages.append(botMessageDiv);
+            } else {
+                const typingIndicator = document.createElement('div');
+                typingIndicator.classList.add('message', 'bot', 'typing-indicator');
+                typingIndicator.innerHTML = '<span>.</span><span>.</span><span>.</span>';
+                chatMessages.append(typingIndicator);
 
-            } catch (error) {
-                chatMessages.removeChild(typingIndicator);
-                const errorDiv = document.createElement('div');
-                errorDiv.classList.add('message', 'bot');
-                errorDiv.textContent = 'אירעה שגיאה: ' + error.message;
-                chatMessages.prepend(errorDiv);
-                console.error('Error fetching from API:', error);
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            "contents": [{
+                                "parts": [{
+                                    "text": userText
+                                }]
+                            }]
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        let errorMessage = 'אירעה שגיאה בשרת. ייתכן שהמפתח לא נכון או שהייתה בעיה בחיבור.';
+                        if (errorData && errorData.error && errorData.error.message) {
+                            errorMessage = 'שגיאה: ' + errorData.error.message;
+                        }
+                        throw new Error(errorMessage);
+                    }
+
+                    const data = await response.json();
+                    botResponse = data.candidates[0].content.parts[0].text;
+
+                    chatMessages.removeChild(typingIndicator);
+    
+                    const botMessageDiv = document.createElement('div');
+                    botMessageDiv.classList.add('message', 'bot');
+                    botMessageDiv.textContent = botResponse;
+                    chatMessages.append(botMessageDiv);
+                } catch (error) {
+                    chatMessages.removeChild(typingIndicator);
+                    const errorDiv = document.createElement('div');
+                    errorDiv.classList.add('message', 'bot');
+                    errorDiv.textContent = 'אירעה שגיאה: ' + error.message;
+                    chatMessages.append(errorDiv);
+                    console.error('Error fetching from API:', error);
+                }
             }
         }
 
@@ -220,4 +242,3 @@
     </script>
 </body>
 </html>
-
