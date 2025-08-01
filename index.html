@@ -315,7 +315,7 @@
 
         let currentUsername = null;
         const whatsappNumber = "972559528533";
-        const chatUrl = "http://YOUR_CHAT_URL"; // *** יש להחליף בכתובת האתר שלך ***
+        const chatUrl = "http://YOUR_CHAT_URL"; // *** יש להחליף בכתובת האתר שלך (או בנתיב לקובץ index.html) ***
         
         // --- API Configuration ---
         const apiKey = "AIzaSyC_2o3J1v16RA4b79JZ1Csdbv4N6Zl9LGw";
@@ -381,14 +381,17 @@
             }
             const { username, password, email } = JSON.parse(tempUserDetails);
 
-            const message = `שלום, נרשמתי לצ'אט בוט עם הפרטים הבאים:\nשם משתמש: ${username}\nסיסמה: ${password}\nמייל: ${email}\n\nלאחר האישור, חזור לצ'אט כאן: ${chatUrl}`;
+            // Create a clear and helpful message for the admin
+            const message = `שלום, נרשמתי לצ'אט בוט עם הפרטים הבאים:\nשם משתמש: ${username}\nסיסמה: ${password}\nמייל: ${email}\n\n*לאחר האישור, אנא חזור/י לאתר להתחברות:*\n${chatUrl}`;
             const encodedMessage = encodeURIComponent(message);
             window.open(`https://wa.me/${whatsappNumber}?text=${encodedMessage}`, '_blank');
             
+            // Assuming the user will be approved, save their details locally
             const users = JSON.parse(localStorage.getItem('chat_users')) || {};
             users[username] = { password: password, email: email };
             localStorage.setItem('chat_users', JSON.stringify(users));
 
+            // Log in the user immediately to show them the chat interface
             loginUser(username);
         }
 
