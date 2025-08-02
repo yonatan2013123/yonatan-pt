@@ -309,6 +309,44 @@
             border-radius: 5px;
             margin-bottom: 5px;
         }
+        /* NEW: CSS for code blocks */
+       .message code-block {
+            display: block;
+            background-color: #1c1c1c;
+            border-radius: 8px;
+            padding: 15px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Consolas', 'Courier New', monospace;
+            line-height: 1.4;
+            font-size: 0.9rem;
+            border: 1px solid #4a4a4a;
+            margin-top: 10px;
+            position: relative; /* For positioning the copy button */
+        }
+
+       .message code-block button {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+       .message code-block:hover button {
+            opacity: 1;
+        }
+
+       .message code-block pre {
+            margin: 0; /* Remove default <pre> margin */
+        }
     </style>
 </head>
 <body>
@@ -426,234 +464,4 @@
 
             const users = JSON.parse(localStorage.getItem('chat_users')) || {};
 
-            if (users[username]) {
-                registerError.textContent = 'שם המשתמש כבר קיים.';
-                registerError.classList.remove('hidden');
-                return;
-            }
-
-            users[username] = { password: password, email: email };
-            localStorage.setItem('chat_users', JSON.stringify(users));
-            
-            const message = `שלום, נרשמתי לצ'אט בוט עם הפרטים הבאים:\nשם משתמש: ${username}\nסיסמה: ${password}\nמייל: ${email}\n\nאנא אשר את המשתמש שלי.`;
-            const encodedMessage = encodeURIComponent(message);
-            window.open(`https://wa.me/${whatsappNumber}?text=${encodedMessage}`, '_blank');
-
-            loginUser(username);
-        }
-
-        function handleLogin(event) {
-            event.preventDefault();
-            const username = document.getElementById('login-username').value.trim();
-            const password = document.getElementById('login-password').value;
-            if (!username || !password) return;
-            
-            const users = JSON.parse(localStorage.getItem('chat_users')) || {};
-
-            const user = users[username];
-            if (user && user.password === password) {
-                loginUser(username);
-            } else {
-                loginError.textContent = 'שם המשתמש או הסיסמה שגויים.';
-                loginError.classList.remove('hidden');
-            }
-        }
-
-        function loginUser(username) {
-            currentUsername = username;
-            sessionStorage.setItem('loggedInUser', username);
-            
-            authContainer.classList.add('hidden');
-            chatContainer.classList.remove('hidden');
-            
-            chatTitle.textContent = `הצ'אט של ${username}`;
-            document.title = `צ'אט - ${username}`;
-            
-            // NEW: Load conversation history into the in-memory array
-            const history = localStorage.getItem(`chatHistory_${username}`);
-            if (history) {
-                conversationHistory = JSON.parse(history).map(msg => ({
-                    role: msg.sender === 'user' ? 'user' : 'model',
-                    parts: [{ text: msg.text }]
-                }));
-                // Also display the messages on screen
-                displayMessagesFromHistory(JSON.parse(history));
-            } else {
-                conversationHistory = [];
-            }
-        }
-
-        // NEW: Separate function to display messages to avoid code duplication
-        function displayMessagesFromHistory(messages) {
-            chatMessages.innerHTML = '';
-            messages.forEach(msg => {
-                const messageDiv = document.createElement('div');
-                messageDiv.classList.add('message', msg.sender);
-                messageDiv.innerText = msg.text;
-                chatMessages.append(messageDiv);
-            });
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        function handleLogout() {
-            currentUsername = null;
-            sessionStorage.removeItem('loggedInUser');
-
-            chatContainer.classList.add('hidden');
-            authContainer.classList.remove('hidden');
-            
-            chatMessages.innerHTML = '';
-            conversationHistory = []; // NEW: Clear the in-memory history
-            loginForm.classList.remove('hidden');
-            registerForm.classList.add('hidden');
-            loginError.classList.add('hidden');
-            registerError.classList.add('hidden');
-            authContainer.querySelector('h2').textContent = 'התחברות';
-            authContainer.querySelector('.auth-switch').textContent = 'אין לך חשבון? הירשם';
-        }
-
-        function checkLoginState() {
-            const loggedInUser = sessionStorage.getItem('loggedInUser');
-            if (loggedInUser) {
-                loginUser(loggedInUser);
-            }
-        }
-
-        function saveChatHistory(sender, text) {
-            if (!currentUsername) return;
-            const historyKey = `chatHistory_${currentUsername}`;
-            const history = JSON.parse(localStorage.getItem(historyKey)) || [];
-            history.push({ sender: sender, text: text });
-            localStorage.setItem(historyKey, JSON.stringify(history));
-        }
-
-        async function sendMessage() {
-            const userText = userInput.value.trim();
-            if (userText === '') return;
-
-            const userMessageDiv = document.createElement('div');
-            userMessageDiv.classList.add('message', 'user');
-            userMessageDiv.innerText = userText;
-            chatMessages.append(userMessageDiv);
-            saveChatHistory('user', userText);
-            
-            // NEW: Add user message to conversation history
-            conversationHistory.push({
-                role: 'user',
-                parts: [{ text: userText }]
-            });
-
-            userInput.value = '';
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-
-            const typingIndicator = document.createElement('div');
-            typingIndicator.classList.add('message', 'typing-indicator');
-            typingIndicator.innerHTML = '<span>.</span><span>.</span><span>.</span>';
-            chatMessages.append(typingIndicator);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-
-            try {
-                // NEW: Send the entire conversation history in the API request
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        "contents": conversationHistory
-                    })
-                });
-
-                if (!response.ok) throw new Error('שגיאה בקבלת תשובה מהשרת.');
-
-                const data = await response.json();
-                const botResponse = data.candidates[0].content.parts[0].text;
-
-                chatMessages.removeChild(typingIndicator);
-    
-                const botMessageDiv = document.createElement('div');
-                botMessageDiv.classList.add('message', 'bot');
-                botMessageDiv.innerText = botResponse;
-                chatMessages.append(botMessageDiv);
-                saveChatHistory('bot', botResponse);
-                
-                // NEW: Add bot message to conversation history
-                conversationHistory.push({
-                    role: 'model',
-                    parts: [{ text: botResponse }]
-                });
-
-                botMessageDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-            } catch (error) {
-                chatMessages.removeChild(typingIndicator);
-                const errorDiv = document.createElement('div');
-                errorDiv.classList.add('message', 'bot');
-                errorDiv.textContent = 'אירעה שגיאה: ' + error.message;
-                chatMessages.append(errorDiv);
-            }
-        }
-
-        function handleKey(event) {
-            if (event.key === 'Enter') {
-                sendMessage();
-            }
-        }
-
-        // --- Admin panel logic ---
-        function showRegisteredUsers() {
-            const users = JSON.parse(localStorage.getItem('chat_users')) || {};
-            userListDiv.innerHTML = '';
-            
-            if (Object.keys(users).length === 0) {
-                userListDiv.innerHTML = '<p>אין משתמשים רשומים בדפדפן זה.</p>';
-                return;
-            }
-
-            const list = document.createElement('ul');
-            for (const username in users) {
-                const user = users[username];
-                const listItem = document.createElement('li');
-                listItem.innerHTML = `
-                    <strong>שם משתמש:</strong> ${username}<br>
-                    <strong>מייל:</strong> ${user.email}<br>
-                    <strong>סיסמה:</strong> ${user.password}
-                `;
-                list.appendChild(listItem);
-            }
-            userListDiv.appendChild(list);
-        }
-
-        adminButton.addEventListener('click', () => {
-            adminPanel.classList.remove('hidden');
-            adminPasswordInput.value = '';
-            adminPasswordInput.style.borderColor = '#00f0ff';
-            adminContentArea.classList.add('hidden');
-        });
-
-        submitAdminPassword.addEventListener('click', () => {
-            if (adminPasswordInput.value === adminPassword) {
-                adminPasswordInput.style.borderColor = '#00ff00';
-                adminContentArea.classList.remove('hidden');
-                showRegisteredUsers();
-            } else {
-                adminPasswordInput.style.borderColor = '#ff4d4d';
-                alert('סיסמה שגויה!');
-            }
-        });
-
-        closeAdminPanelButton.addEventListener('click', () => {
-            adminPanel.classList.add('hidden');
-            adminPasswordInput.style.borderColor = '#00f0ff';
-        });
-
-        showUsersButton.addEventListener('click', showRegisteredUsers);
-
-        // --- Event Listeners ---
-        loginForm.addEventListener('submit', handleLogin);
-        registerForm.addEventListener('submit', handleRegistration);
-        logoutButton.addEventListener('click', handleLogout);
-
-        // --- Initial Load ---
-        checkLoginState();
-    </script>
-</body>
-</html>
+            if (users
