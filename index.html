@@ -105,6 +105,9 @@
             height: auto;
             margin-bottom: 15px;
         }
+       .auth-error.success {
+            color: #4CAF50; /* Green color for success messages */
+        }
         /* --- Chat Container Styles --- */
        .chat-container {
             width: 90%;
@@ -451,11 +454,16 @@
             }
         }
 
+        // NEW: Updated registration function
         function handleRegistration(event) {
             event.preventDefault();
             const username = document.getElementById('register-username').value.trim();
             const password = document.getElementById('register-password').value;
             const email = document.getElementById('register-email').value.trim();
+            
+            registerError.classList.remove('success');
+            registerError.classList.add('hidden');
+
             if (!username || !password || !email) {
                 registerError.textContent = 'אנא מלא את כל השדות.';
                 registerError.classList.remove('hidden');
@@ -464,4 +472,275 @@
 
             const users = JSON.parse(localStorage.getItem('chat_users')) || {};
 
-            if (users
+            if (users[username]) {
+                registerError.textContent = 'שם המשתמש כבר קיים.';
+                registerError.classList.remove('hidden');
+                return;
+            }
+
+            users[username] = { password: password, email: email };
+            localStorage.setItem('chat_users', JSON.stringify(users));
+            
+            const message = `שלום, נרשמתי לצ'אט בוט עם הפרטים הבאים:\nשם משתמש: ${username}\nסיסמה: ${password}\nמייל: ${email}\n\nאנא אשר את המשתמש שלי.`;
+            const encodedMessage = encodeURIComponent(message);
+            window.open(`https://wa.me/${whatsappNumber}?text=${encodedMessage}`, '_blank');
+
+            // NEW: Show a success message and toggle back to the login form
+            registerError.textContent = 'ההרשמה בוצעה בהצלחה! אנא התחבר עם הפרטים שלך.';
+            registerError.classList.add('success');
+            registerError.classList.remove('hidden');
+            
+            // Clear the registration form inputs
+            document.getElementById('register-username').value = '';
+            document.getElementById('register-email').value = '';
+            document.getElementById('register-password').value = '';
+
+            setTimeout(() => {
+                toggleForms();
+                registerError.classList.add('hidden');
+            }, 3000); // Hide the success message and switch back after 3 seconds
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value;
+            if (!username || !password) return;
+            
+            const users = JSON.parse(localStorage.getItem('chat_users')) || {};
+
+            const user = users[username];
+            if (user && user.password === password) {
+                loginUser(username);
+            } else {
+                loginError.textContent = 'שם המשתמש או הסיסמה שגויים.';
+                loginError.classList.remove('hidden');
+            }
+        }
+
+        function loginUser(username) {
+            currentUsername = username;
+            sessionStorage.setItem('loggedInUser', username);
+            
+            authContainer.classList.add('hidden');
+            chatContainer.classList.remove('hidden');
+            
+            chatTitle.textContent = `הצ'אט של ${username}`;
+            document.title = `צ'אט - ${username}`;
+            
+            // NEW: Load conversation history into the in-memory array
+            const history = localStorage.getItem(`chatHistory_${username}`);
+            if (history) {
+                conversationHistory = JSON.parse(history).map(msg => ({
+                    role: msg.sender === 'user' ? 'user' : 'model',
+                    parts: [{ text: msg.text }]
+                }));
+                // Also display the messages on screen
+                displayMessagesFromHistory(JSON.parse(history));
+            } else {
+                conversationHistory = [];
+            }
+        }
+
+        function displayMessagesFromHistory(messages) {
+            chatMessages.innerHTML = '';
+            messages.forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message', msg.sender);
+                
+                messageDiv.innerHTML = formatBotResponse(msg.text);
+
+                chatMessages.append(messageDiv);
+            });
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function handleLogout() {
+            currentUsername = null;
+            sessionStorage.removeItem('loggedInUser');
+
+            chatContainer.classList.add('hidden');
+            authContainer.classList.remove('hidden');
+            
+            chatMessages.innerHTML = '';
+            conversationHistory = [];
+            loginForm.classList.remove('hidden');
+            registerForm.classList.add('hidden');
+            loginError.classList.add('hidden');
+            registerError.classList.add('hidden');
+            authContainer.querySelector('h2').textContent = 'התחברות';
+            authContainer.querySelector('.auth-switch').textContent = 'אין לך חשבון? הירשם';
+        }
+
+        function checkLoginState() {
+            const loggedInUser = sessionStorage.getItem('loggedInUser');
+            if (loggedInUser) {
+                loginUser(loggedInUser);
+            }
+        }
+
+        function saveChatHistory(sender, text) {
+            if (!currentUsername) return;
+            const historyKey = `chatHistory_${currentUsername}`;
+            const history = JSON.parse(localStorage.getItem(historyKey)) || [];
+            history.push({ sender: sender, text: text });
+            localStorage.setItem(historyKey, JSON.stringify(history));
+        }
+
+        function formatBotResponse(text) {
+            const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
+            if (codeBlockRegex.test(text)) {
+                return text.replace(codeBlockRegex, (match, lang, code) => {
+                    const uniqueId = 'copy-btn-' + Date.now();
+                    return `
+                        <code-block>
+                            <pre><code class="language-${lang}">${code.trim()}</code></pre>
+                            <button onclick="copyCode(this)">העתק</button>
+                        </code-block>
+                    `;
+                });
+            }
+            return text;
+        }
+
+        function copyCode(button) {
+            const codeBlock = button.parentNode.querySelector('code');
+            const codeText = codeBlock.innerText;
+            navigator.clipboard.writeText(codeText).then(() => {
+                const originalText = button.innerText;
+                button.innerText = 'הועתק!';
+                setTimeout(() => {
+                    button.innerText = originalText;
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        }
+        
+        async function sendMessage() {
+            const userText = userInput.value.trim();
+            if (userText === '') return;
+
+            const userMessageDiv = document.createElement('div');
+            userMessageDiv.classList.add('message', 'user');
+            userMessageDiv.innerText = userText;
+            chatMessages.append(userMessageDiv);
+            saveChatHistory('user', userText);
+            
+            conversationHistory.push({
+                role: 'user',
+                parts: [{ text: userText }]
+            });
+
+            userInput.value = '';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            const typingIndicator = document.createElement('div');
+            typingIndicator.classList.add('message', 'typing-indicator');
+            typingIndicator.innerHTML = '<span>.</span><span>.</span><span>.</span>';
+            chatMessages.append(typingIndicator);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        "contents": conversationHistory
+                    })
+                });
+
+                if (!response.ok) throw new Error('שגיאה בקבלת תשובה מהשרת.');
+
+                const data = await response.json();
+                const botResponseRaw = data.candidates[0].content.parts[0].text;
+                
+                const botResponseFormatted = formatBotResponse(botResponseRaw);
+
+                chatMessages.removeChild(typingIndicator);
+    
+                const botMessageDiv = document.createElement('div');
+                botMessageDiv.classList.add('message', 'bot');
+                botMessageDiv.innerHTML = botResponseFormatted;
+                chatMessages.append(botMessageDiv);
+                
+                saveChatHistory('bot', botResponseRaw);
+                
+                conversationHistory.push({
+                    role: 'model',
+                    parts: [{ text: botResponseRaw }]
+                });
+
+                botMessageDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            } catch (error) {
+                chatMessages.removeChild(typingIndicator);
+                const errorDiv = document.createElement('div');
+                errorDiv.classList.add('message', 'bot');
+                errorDiv.textContent = 'אירעה שגיאה: ' + error.message;
+                chatMessages.append(errorDiv);
+            }
+        }
+
+        function handleKey(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function showRegisteredUsers() {
+            const users = JSON.parse(localStorage.getItem('chat_users')) || {};
+            userListDiv.innerHTML = '';
+            
+            if (Object.keys(users).length === 0) {
+                userListDiv.innerHTML = '<p>אין משתמשים רשומים בדפדפן זה.</p>';
+                return;
+            }
+
+            const list = document.createElement('ul');
+            for (const username in users) {
+                const user = users[username];
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                    <strong>שם משתמש:</strong> ${username}<br>
+                    <strong>מייל:</strong> ${user.email}<br>
+                    <strong>סיסמה:</strong> ${user.password}
+                `;
+                list.appendChild(listItem);
+            }
+            userListDiv.appendChild(list);
+        }
+
+        adminButton.addEventListener('click', () => {
+            adminPanel.classList.remove('hidden');
+            adminPasswordInput.value = '';
+            adminPasswordInput.style.borderColor = '#00f0ff';
+            adminContentArea.classList.add('hidden');
+        });
+
+        submitAdminPassword.addEventListener('click', () => {
+            if (adminPasswordInput.value === adminPassword) {
+                adminPasswordInput.style.borderColor = '#00ff00';
+                adminContentArea.classList.remove('hidden');
+                showRegisteredUsers();
+            } else {
+                adminPasswordInput.style.borderColor = '#ff4d4d';
+                alert('סיסמה שגויה!');
+            }
+        });
+
+        closeAdminPanelButton.addEventListener('click', () => {
+            adminPanel.classList.add('hidden');
+            adminPasswordInput.style.borderColor = '#00f0ff';
+        });
+
+        showUsersButton.addEventListener('click', showRegisteredUsers);
+
+        loginForm.addEventListener('submit', handleLogin);
+        registerForm.addEventListener('submit', handleRegistration);
+        logoutButton.addEventListener('click', handleLogout);
+
+        checkLoginState();
+    </script>
+</body>
+</html>
