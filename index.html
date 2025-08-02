@@ -311,7 +311,25 @@
             padding: 10px;
             border-radius: 5px;
             margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
+        /* NEW: Delete Button CSS */
+        #user-list li button {
+            background: #ff4d4d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background-color 0.3s ease;
+        }
+        #user-list li button:hover {
+            background: #e60000;
+        }
+
         /* NEW: CSS for code blocks */
        .message code-block {
             display: block;
@@ -702,13 +720,36 @@
                 const user = users[username];
                 const listItem = document.createElement('li');
                 listItem.innerHTML = `
-                    <strong>שם משתמש:</strong> ${username}<br>
-                    <strong>מייל:</strong> ${user.email}<br>
-                    <strong>סיסמה:</strong> ${user.password}
+                    <span>
+                        <strong>שם משתמש:</strong> ${username}<br>
+                        <strong>מייל:</strong></strong> ${user.email}
+                    </span>
+                    <button onclick="deleteUser('${username}')">מחק</button>
                 `;
                 list.appendChild(listItem);
             }
             userListDiv.appendChild(list);
+        }
+
+        // NEW: Function to delete a user and their history
+        function deleteUser(username) {
+            if (confirm(`האם אתה בטוח שברצונך למחוק את המשתמש ${username} ואת כל היסטוריית הצ'אט שלו?`)) {
+                let users = JSON.parse(localStorage.getItem('chat_users')) || {};
+                delete users[username];
+                localStorage.setItem('chat_users', JSON.stringify(users));
+                
+                localStorage.removeItem(`chatHistory_${username}`);
+                
+                alert(`המשתמש ${username} נמחק בהצלחה.`);
+                
+                // Refresh the list
+                showRegisteredUsers();
+
+                // If the currently logged-in user is the one being deleted, log them out
+                if (currentUsername === username) {
+                    handleLogout();
+                }
+            }
         }
 
         adminButton.addEventListener('click', () => {
