@@ -428,7 +428,7 @@
         const chatContainer = document.getElementById('chat-container');
         const loginForm = document.getElementById('login-form');
         const registerForm = document.getElementById('register-form');
-        const loginError = document.getElementById('login-error');
+        const loginError = document.getElementById('auth-error'); // Use the single error div for all auth messages
         const registerError = document.getElementById('register-error');
         const chatMessages = document.getElementById('chatMessages');
         const userInput = document.getElementById('userInput');
@@ -452,7 +452,6 @@
         const whatsappNumber = "972559528533";
         const adminPassword = 'qweR2013';
 
-        // NEW: Array to hold the conversation history
         let conversationHistory = [];
 
         // --- Functions ---
@@ -472,7 +471,6 @@
             }
         }
 
-        // NEW: Updated registration function
         function handleRegistration(event) {
             event.preventDefault();
             const username = document.getElementById('register-username').value.trim();
@@ -503,12 +501,10 @@
             const encodedMessage = encodeURIComponent(message);
             window.open(`https://wa.me/${whatsappNumber}?text=${encodedMessage}`, '_blank');
 
-            // NEW: Show a success message and toggle back to the login form
             registerError.textContent = 'ההרשמה בוצעה בהצלחה! אנא התחבר עם הפרטים שלך.';
             registerError.classList.add('success');
             registerError.classList.remove('hidden');
             
-            // Clear the registration form inputs
             document.getElementById('register-username').value = '';
             document.getElementById('register-email').value = '';
             document.getElementById('register-password').value = '';
@@ -516,21 +512,33 @@
             setTimeout(() => {
                 toggleForms();
                 registerError.classList.add('hidden');
-            }, 3000); // Hide the success message and switch back after 3 seconds
+            }, 3000); 
         }
 
+        // NEW: Updated login function to distinguish between user not found and wrong password
         function handleLogin(event) {
             event.preventDefault();
             const username = document.getElementById('login-username').value.trim();
             const password = document.getElementById('login-password').value;
+            
+            loginError.classList.add('hidden'); // Clear previous errors
+
             if (!username || !password) return;
             
             const users = JSON.parse(localStorage.getItem('chat_users')) || {};
-
             const user = users[username];
-            if (user && user.password === password) {
+
+            // Check if the user exists
+            if (!user) {
+                loginError.textContent = 'משתמש לא קיים.';
+                loginError.classList.remove('hidden');
+            } 
+            // If user exists, check the password
+            else if (user.password === password) {
                 loginUser(username);
-            } else {
+            } 
+            // If user exists but password is wrong
+            else {
                 loginError.textContent = 'שם המשתמש או הסיסמה שגויים.';
                 loginError.classList.remove('hidden');
             }
@@ -546,14 +554,12 @@
             chatTitle.textContent = `הצ'אט של ${username}`;
             document.title = `צ'אט - ${username}`;
             
-            // NEW: Load conversation history into the in-memory array
             const history = localStorage.getItem(`chatHistory_${username}`);
             if (history) {
                 conversationHistory = JSON.parse(history).map(msg => ({
                     role: msg.sender === 'user' ? 'user' : 'model',
                     parts: [{ text: msg.text }]
                 }));
-                // Also display the messages on screen
                 displayMessagesFromHistory(JSON.parse(history));
             } else {
                 conversationHistory = [];
@@ -565,9 +571,7 @@
             messages.forEach(msg => {
                 const messageDiv = document.createElement('div');
                 messageDiv.classList.add('message', msg.sender);
-                
                 messageDiv.innerHTML = formatBotResponse(msg.text);
-
                 chatMessages.append(messageDiv);
             });
             chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -576,10 +580,8 @@
         function handleLogout() {
             currentUsername = null;
             sessionStorage.removeItem('loggedInUser');
-
             chatContainer.classList.add('hidden');
             authContainer.classList.remove('hidden');
-            
             chatMessages.innerHTML = '';
             conversationHistory = [];
             loginForm.classList.remove('hidden');
@@ -731,7 +733,6 @@
             userListDiv.appendChild(list);
         }
 
-        // NEW: Function to delete a user and their history
         function deleteUser(username) {
             if (confirm(`האם אתה בטוח שברצונך למחוק את המשתמש ${username} ואת כל היסטוריית הצ'אט שלו?`)) {
                 let users = JSON.parse(localStorage.getItem('chat_users')) || {};
@@ -742,10 +743,8 @@
                 
                 alert(`המשתמש ${username} נמחק בהצלחה.`);
                 
-                // Refresh the list
                 showRegisteredUsers();
 
-                // If the currently logged-in user is the one being deleted, log them out
                 if (currentUsername === username) {
                     handleLogout();
                 }
