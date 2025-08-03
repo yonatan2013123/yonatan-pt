@@ -419,7 +419,7 @@
         <div class="chat-header">
             <button id="logout-button">התנתק</button>
             <h1 id="chat-title">בוט הצ'אט שלך</h1>
-            <button id="admin-button">ניהול</button>
+            <button id="admin-button" class="hidden">ניהול</button> <!-- Added hidden class here -->
         </div>
         <div class="chat-messages" id="chatMessages">
         </div>
@@ -501,6 +501,7 @@
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
         const whatsappNumber = "972559528533";
         const adminPassword = 'qweR2013'; // Still used for admin panel access, but not for user management
+        const ADMIN_USERNAME = 'יוני'; // Define the admin username here
 
         // --- Custom Modal Functions ---
         function showModal(title, message) {
@@ -877,6 +878,13 @@
                 chatTitle.textContent = `הצ'אט של ${currentUsername}`;
                 document.title = `צ'אט - ${currentUsername}`;
 
+                // Show admin button only for the ADMIN_USERNAME
+                if (currentUsername === ADMIN_USERNAME) {
+                    adminButton.classList.remove('hidden');
+                } else {
+                    adminButton.classList.add('hidden');
+                }
+
                 // Unsubscribe from previous listener if exists
                 if (unsubscribeSnapshot) {
                     unsubscribeSnapshot();
@@ -914,6 +922,7 @@
                 registerError.classList.remove('visible');
                 authContainer.querySelector('h2').textContent = 'התחברות';
                 authContainer.querySelector('.auth-switch').textContent = 'אין לך חשבון? הירשם';
+                adminButton.classList.add('hidden'); // Ensure admin button is hidden on logout
 
                 // Unsubscribe from previous listener if user logs out
                 if (unsubscribeSnapshot) {
