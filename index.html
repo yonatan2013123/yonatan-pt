@@ -1,200 +1,951 @@
 <!DOCTYPE html>
 <html lang="he">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>YonatanPT - Chat</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #343541;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0f0a1e, #2a0b38);
+            color: #e0e0e0;
+            margin: 0;
+            padding: 0;
+            direction: rtl;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+       .hidden {
+            display: none!important;
+        }
+        /* --- Auth Container Styles --- */
+       .auth-container {
+            width: 90%;
+            max-width: 400px;
+            background: rgba(40, 40, 40, 0.7);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid #3d3d3d;
+            transition: all 0.5s ease;
+        }
+       .auth-container h2 {
+            text-align: center;
+            color: #00f0ff;
+            margin-bottom: 25px;
+            font-size: 2rem;
+            transition: all 0.5s ease;
+        }
+       .auth-container form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+       .auth-container form input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #00f0ff;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+       .auth-container form input:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+        }
+       .auth-container form button {
+            width: 100%;
+            background: #00f0ff;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+        }
+       .auth-container form button:hover {
+            background: #00ffff;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.8);
+        }
+       .auth-switch {
+            text-align: center;
+            margin-top: 20px;
+            cursor: pointer;
+            color: #00f0ff;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+       .auth-switch:hover {
+            color: #00ffff;
+            text-decoration: underline;
+        }
+       .auth-error {
+            color: #ff4d4d;
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            visibility: hidden;
+            height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease-in-out;
+        }
+       .auth-error.visible {
+            visibility: visible;
+            height: auto;
+            margin-bottom: 15px;
+        }
+       .auth-error.success {
+            color: #4CAF50; /* Green color for success messages */
+        }
+        /* --- Chat Container Styles --- */
+       .chat-container {
+            width: 90%;
+            max-width: 800px;
+            background: rgba(40, 40, 40, 0.7);
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid #3d3d3d;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 90vh;
+        }
+       .chat-header {
+            padding: 15px;
+            background: rgba(30, 30, 30, 0.8);
+            border-bottom: 1px solid #4a4a4a;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+       .chat-header h1 {
+            margin: 0;
+            font-size: 1.6rem;
+            color: #00f0ff;
+            text-shadow: 0 0 5px #00f0ff;
+        }
+        #logout-button {
+            background: #ff4d4d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease;
+        }
+        #logout-button:hover {
+            background: #e60000;
+        }
+        #admin-button {
+            background: #00ffff;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease;
+        }
+        #admin-button:hover {
+            background: #00cccc;
+        }
+       .chat-messages {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+       .message {
+            max-width: 80%;
+            padding: 12px 18px;
+            border-radius: 20px;
+            line-height: 1.5;
+            animation: fadeIn 0.4s ease-out;
+            word-wrap: break-word;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+       .message.user {
+            background: #007bff;
+            align-self: flex-end;
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+       .message.bot {
+            background: #2a2a2a;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+       .chat-input {
+            display: flex;
+            padding: 15px;
+            border-top: 1px solid #4a4a4a;
+            background: rgba(30, 30, 30, 0.8);
+        }
+       .chat-input input {
+            flex-grow: 1;
+            padding: 15px;
+            border-radius: 50px;
+            border: 1px solid #00f0ff;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            font-size: 1rem;
+            margin-left: 10px;
+            transition: all 0.3s ease;
+        }
+       .chat-input input:focus {
+            outline: none;
+            box-shadow: 0 0 8px #00f0ff;
+        }
+       .chat-input input::placeholder {
+            color: #777;
+        }
+       .chat-input button {
+            background: #00f0ff;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 50px;
+            padding: 0 25px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+       .chat-input button:hover {
+            box-shadow: 0 0 10px #00f0ff;
+            transform: scale(1.05);
+        }
+       .typing-indicator {
+            align-self: flex-start;
+            background: #2a2a2a;
+            padding: 12px 18px;
+            border-radius: 20px;
+            font-style: normal;
+        }
+       .typing-indicator span {
+            animation: typing-dots 1s infinite;
+            opacity: 0;
+            display: inline-block;
+        }
+       .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+       .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing-dots {
+            0%, 80%, 100% { opacity: 0; }
+            40% { opacity: 1; }
+        }
+        #admin-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        .admin-content {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        #admin-password {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #00ffff;
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+        #submit-admin-password, #close-admin-panel {
+            background: #00f0ff;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+        #close-admin-panel {
+            background: #ff4d4d;
+        }
+        /* NEW: CSS for code blocks */
+       .message code-block {
+            display: block;
+            background-color: #1c1c1c;
+            border-radius: 8px;
+            padding: 15px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Consolas', 'Courier New', monospace;
+            line-height: 1.4;
+            font-size: 0.9rem;
+            border: 1px solid #4a4a4a;
+            margin-top: 10px;
+            position: relative; /* For positioning the copy button */
+        }
 
-    h1 {
-      color: #19c37d;
-    }
+       .message code-block button {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
 
-    .form-container, .chat-container {
-      background: #444654;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.2);
-      max-width: 500px;
-      width: 100%;
-      margin-bottom: 20px;
-    }
+       .message code-block:hover button {
+            opacity: 1;
+        }
 
-    input, textarea {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      border: none;
-      border-radius: 5px;
-      font-size: 16px;
-    }
+       .message code-block pre {
+            margin: 0; /* Remove default <pre> margin */
+        }
 
-    button {
-      width: 100%;
-      padding: 10px;
-      background-color: #19c37d;
-      border: none;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 5px;
-      margin-bottom: 10px;
-    }
+        /* Custom Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+        }
 
-    #userStatus {
-      margin-top: 10px;
-      font-weight: bold;
-    }
+        .modal-content {
+            background: #2a2a2a;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
 
-    .message {
-      background: #555;
-      padding: 8px 12px;
-      border-radius: 6px;
-      margin: 6px 0;
-    }
-  </style>
+        .modal-content h3 {
+            color: #00f0ff;
+            margin-bottom: 10px;
+        }
+
+        .modal-content p {
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        .modal-content button {
+            background: #00f0ff;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-content button:hover {
+            background: #00ffff;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.8);
+        }
+
+    </style>
 </head>
 <body>
-  <h1>YonatanPT - Chat</h1>
 
-  <div class="form-container">
-    <input type="email" id="email" placeholder="מייל" />
-    <input type="password" id="password" placeholder="סיסמה" />
-    <button onclick="register()">הרשמה</button>
-    <button onclick="login()">התחברות</button>
-    <button onclick="logout()">התנתקות</button>
-    <div id="userStatus">לא מחובר</div>
-  </div>
+    <div class="auth-container" data-mode="login">
+        <h2 id="auth-title">התחברות</h2>
+        <div id="auth-error" class="auth-error hidden"></div>
 
-  <div class="chat-container" id="chatSection" style="display:none;">
-    <textarea id="messageInput" rows="3" placeholder="כתוב הודעה..."></textarea>
-    <button onclick="sendMessage()">שלח</button>
-    <h3>ההודעות שלך:</h3>
-    <div id="messagesList"></div>
-  </div>
+        <form id="login-form">
+            <input type="email" id="login-email" placeholder="אימייל" required>
+            <input type="password" id="login-password" placeholder="סיסמה" required>
+            <button type="submit">התחבר</button>
+        </form>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics.js";
-    import {
-      getAuth,
-      createUserWithEmailAndPassword,
-      signInWithEmailAndPassword,
-      signOut,
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-    import {
-      getFirestore,
-      collection,
-      addDoc,
-      query,
-      where,
-      onSnapshot,
-      orderBy
-    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+        <form id="register-form" class="hidden">
+            <h2>הרשמה</h2>
+            <div id="register-error" class="auth-error hidden"></div>
+            <input type="text" id="register-username" placeholder="בחר שם משתמש (יוצג בצ'אט)" required>
+            <input type="email" id="register-email" placeholder="הכנס כתובת מייל" required>
+            <input type="password" id="register-password" placeholder="בחר סיסמה" required>
+            <button type="submit">הירשם</button>
+        </form>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDjJrntuQMqBHUrFEObqO9wc7q22WuIa6g",
-      authDomain: "mychat-e64d8.firebaseapp.com",
-      projectId: "mychat-e64d8",
-      storageBucket: "mychat-e64d8.appspot.com",
-      messagingSenderId: "261580126963",
-      appId: "1:261580126963:web:764f614f33bb3851375586",
-      measurementId: "G-XSN0E73MMN"
-    };
+        <p class="auth-switch" onclick="toggleForms()">אין לך חשבון? הירשם</p>
+    </div>
 
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    <div class="chat-container hidden" id="chat-container">
+        <div class="chat-header">
+            <button id="logout-button">התנתק</button>
+            <h1 id="chat-title">בוט הצ'אט שלך</h1>
+            <button id="admin-button">ניהול</button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+        </div>
+        <div class="chat-input">
+            <input type="text" id="userInput" placeholder="אני מקשיב..." onkeydown="handleKey(event)">
+            <button onclick="sendMessage()">שלח</button>
+        </div>
+    </div>
 
-    const statusEl = document.getElementById('userStatus');
-    const chatSection = document.getElementById('chatSection');
-    const messagesList = document.getElementById('messagesList');
+    <div id="admin-panel" class="hidden">
+        <div class="admin-content">
+            <h3>פאנל ניהול</h3>
+            <input type="password" id="admin-password" placeholder="הכנס סיסמה">
+            <button id="submit-admin-password">אישור</button>
+            <button id="close-admin-panel">סגור</button>
+            <div id="admin-content-area" class="hidden">
+                <p>ברוך הבא למנהל. פאנל זה אינו תומך בניהול משתמשים ישירות מהדפדפן מטעמי אבטחה. ניהול משתמשים מתבצע דרך קונסולת Firebase.</p>
+            </div>
+        </div>
+    </div>
 
-    window.register = async function () {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      try {
-        await createUserWithEmailAndPassword(auth, email, password);
-        alert("נרשמת בהצלחה!");
-      } catch (error) {
-        alert("שגיאה בהרשמה: " + error.message);
-      }
-    }
+    <!-- Custom Modal for Alerts/Confirmations -->
+    <div id="custom-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 id="modal-title"></h3>
+            <p id="modal-message"></p>
+            <button id="modal-ok-button">אישור</button>
+        </div>
+    </div>
 
-    window.login = async function () {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-        alert("התחברת בהצלחה!");
-      } catch (error) {
-        alert("שגיאה בהתחברות: " + error.message);
-      }
-    }
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "[https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js](https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js)";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "[https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js](https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js)";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, where, getDocs, doc, deleteDoc, setDoc } from "[https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js](https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js)";
 
-    window.logout = function () {
-      signOut(auth);
-    }
+        // Global variables for Firebase config and auth token (provided by Canvas environment)
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        statusEl.textContent = "מחובר כ־" + user.email;
-        chatSection.style.display = "block";
-        loadMessages(user.uid);
-      } else {
-        statusEl.textContent = "לא מחובר";
-        chatSection.style.display = "none";
-        messagesList.innerHTML = "";
-      }
-    });
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-    window.sendMessage = async function () {
-      const text = document.getElementById("messageInput").value.trim();
-      const user = auth.currentUser;
-      if (!text || !user) return;
+        // DOM Elements
+        const authContainer = document.querySelector('.auth-container');
+        const chatContainer = document.getElementById('chat-container');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const loginError = document.getElementById('auth-error');
+        const registerError = document.getElementById('register-error');
+        const chatMessages = document.getElementById('chatMessages');
+        const userInput = document.getElementById('userInput');
+        const logoutButton = document.getElementById('logout-button');
+        const chatTitle = document.getElementById('chat-title');
 
-      try {
-        await addDoc(collection(db, "messages"), {
-          uid: user.uid,
-          text: text,
-          timestamp: Date.now()
+        const adminButton = document.getElementById('admin-button');
+        const adminPanel = document.getElementById('admin-panel');
+        const adminPasswordInput = document.getElementById('admin-password');
+        const submitAdminPassword = document.getElementById('submit-admin-password');
+        const closeAdminPanelButton = document.getElementById('close-admin-panel');
+        const adminContentArea = document.getElementById('admin-content-area');
+
+        // Custom Modal Elements
+        const customModal = document.getElementById('custom-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMessage = document.getElementById('modal-message');
+        const modalOkButton = document.getElementById('modal-ok-button');
+
+        let currentUserId = null;
+        let currentUsername = null;
+        let conversationHistory = [];
+        let unsubscribeSnapshot = null; // To store the unsubscribe function for Firestore listener
+
+        // --- API Configuration ---
+        const apiKey = ""; // Canvas will automatically provide this in runtime
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        const whatsappNumber = "972559528533";
+        const adminPassword = 'qweR2013'; // Still used for admin panel access, but not for user management
+
+        // --- Custom Modal Functions ---
+        function showModal(title, message) {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            customModal.classList.remove('hidden');
+        }
+
+        function hideModal() {
+            customModal.classList.add('hidden');
+        }
+
+        // --- Functions ---
+        function toggleForms() {
+            loginForm.classList.toggle('hidden');
+            registerForm.classList.toggle('hidden');
+            loginError.classList.add('hidden');
+            loginError.classList.remove('visible');
+            registerError.classList.add('hidden');
+            registerError.classList.remove('visible');
+            const authTitle = authContainer.querySelector('h2');
+            const authSwitch = authContainer.querySelector('.auth-switch');
+            if (registerForm.classList.contains('hidden')) {
+                authTitle.textContent = 'התחברות';
+                authSwitch.textContent = 'אין לך חשבון? הירשם';
+            } else {
+                authTitle.textContent = 'הרשמה';
+                authSwitch.textContent = 'יש לך כבר חשבון? התחבר';
+            }
+        }
+
+        async function handleRegistration(event) {
+            event.preventDefault();
+            const username = document.getElementById('register-username').value.trim();
+            const email = document.getElementById('register-email').value.trim();
+            const password = document.getElementById('register-password').value;
+
+            registerError.classList.remove('success');
+            registerError.classList.add('hidden');
+            registerError.classList.remove('visible');
+
+            if (!username || !password || !email) {
+                registerError.textContent = 'אנא מלא את כל השדות.';
+                registerError.classList.remove('hidden');
+                registerError.classList.add('visible');
+                return;
+            }
+
+            try {
+                // Check if username is already taken in Firestore (optional, but good practice)
+                const usersRef = collection(db, `artifacts/${appId}/users`);
+                const q = query(usersRef, where('username', '==', username));
+                const querySnapshot = await getDocs(q);
+                if (!querySnapshot.empty) {
+                    registerError.textContent = 'שם המשתמש כבר קיים. אנא בחר שם משתמש אחר.';
+                    registerError.classList.remove('hidden');
+                    registerError.classList.add('visible');
+                    return;
+                }
+
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // Store additional user data (username) in Firestore
+                await setDoc(doc(db, `artifacts/${appId}/users`, user.uid), {
+                    username: username,
+                    email: email,
+                    createdAt: serverTimestamp()
+                });
+
+                const message = `שלום, נרשמתי לצ'אט בוט עם הפרטים הבאים:\nשם משתמש: ${username}\nמייל: ${email}\n\nאנא אשר את המשתמש שלי.`;
+                const encodedMessage = encodeURIComponent(message);
+                window.open(`https://wa.me/${whatsappNumber}?text=${encodedMessage}`, '_blank');
+
+                showModal('הרשמה בוצעה בהצלחה!', 'ההרשמה בוצעה בהצלחה! אנא התחבר עם הפרטים שלך.');
+
+                document.getElementById('register-username').value = '';
+                document.getElementById('register-email').value = '';
+                document.getElementById('register-password').value = '';
+
+                setTimeout(() => {
+                    toggleForms();
+                    hideModal();
+                }, 3000);
+
+            } catch (error) {
+                console.error("Registration error:", error);
+                let errorMessage = 'שגיאה בהרשמה.';
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage = 'כתובת המייל כבר בשימוש.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'כתובת מייל לא חוקית.';
+                } else if (error.code === 'auth/weak-password') {
+                    errorMessage = 'הסיסמה חלשה מדי (לפחות 6 תווים).';
+                }
+                registerError.textContent = errorMessage;
+                registerError.classList.remove('hidden');
+                registerError.classList.add('visible');
+            }
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+
+            loginError.classList.add('hidden');
+            loginError.classList.remove('visible');
+
+            if (!email || !password) {
+                loginError.textContent = 'אנא מלא את כל השדות.';
+                loginError.classList.remove('hidden');
+                loginError.classList.add('visible');
+                return;
+            }
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                // The onAuthStateChanged listener will handle UI update
+            } catch (error) {
+                console.error("Login error:", error);
+                let errorMessage = 'שגיאה בהתחברות.';
+                if (error.code === 'auth/invalid-credential') {
+                    errorMessage = 'אימייל או סיסמה שגויים.';
+                } else if (error.code === 'auth/user-not-found') {
+                    errorMessage = 'משתמש לא נמצא.';
+                } else if (error.code === 'auth/wrong-password') {
+                    errorMessage = 'סיסמה שגויה.';
+                }
+                loginError.textContent = errorMessage;
+                loginError.classList.remove('hidden');
+                loginError.classList.add('visible');
+            }
+        }
+
+        async function handleLogout() {
+            try {
+                await signOut(auth);
+                // The onAuthStateChanged listener will handle UI update
+            } catch (error) {
+                console.error("Logout error:", error);
+                showModal('שגיאת התנתקות', 'אירעה שגיאה בעת ההתנתקות: ' + error.message);
+            }
+        }
+
+        async function fetchUsername(uid) {
+            try {
+                const userDocRef = doc(db, `artifacts/${appId}/users`, uid);
+                const userDocSnap = await getDoc(userDocRef);
+                if (userDocSnap.exists()) {
+                    return userDocSnap.data().username || uid; // Fallback to UID if username not found
+                }
+            } catch (error) {
+                console.error("Error fetching username:", error);
+            }
+            return uid; // Return UID if unable to fetch username
+        }
+
+        function displayMessages(messages) {
+            chatMessages.innerHTML = '';
+            messages.forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message', msg.sender);
+                messageDiv.innerHTML = formatBotResponse(msg.text);
+                chatMessages.append(messageDiv);
+            });
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function formatBotResponse(text) {
+            const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
+            if (codeBlockRegex.test(text)) {
+                return text.replace(codeBlockRegex, (match, lang, code) => {
+                    return `
+                        <code-block>
+                            <pre><code class="language-${lang || ''}">${code.trim()}</code></pre>
+                            <button onclick="copyCode(this)">העתק</button>
+                        </code-block>
+                    `;
+                });
+            }
+            return text;
+        }
+
+        function copyCode(button) {
+            const codeBlock = button.parentNode.querySelector('code');
+            const codeText = codeBlock.innerText;
+            // Using document.execCommand('copy') as navigator.clipboard.writeText() might be restricted in iframes
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = codeText;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            try {
+                document.execCommand('copy');
+                const originalText = button.innerText;
+                button.innerText = 'הועתק!';
+                setTimeout(() => {
+                    button.innerText = originalText;
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy text using execCommand: ', err);
+                showModal('שגיאת העתקה', 'העתקת הקוד נכשלה. אנא העתק ידנית.');
+            } finally {
+                document.body.removeChild(tempTextArea);
+            }
+        }
+
+        async function sendMessage() {
+            const userText = userInput.value.trim();
+            if (userText === '') return;
+
+            const userMessageDiv = document.createElement('div');
+            userMessageDiv.classList.add('message', 'user');
+            userMessageDiv.innerText = userText;
+            chatMessages.append(userMessageDiv);
+
+            userInput.value = '';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Add user message to Firestore
+            try {
+                await addDoc(collection(db, `artifacts/${appId}/users/${currentUserId}/chat_messages`), {
+                    sender: 'user',
+                    text: userText,
+                    timestamp: serverTimestamp()
+                });
+            } catch (error) {
+                console.error("Error saving user message to Firestore:", error);
+                showModal('שגיאה', 'שגיאה בשמירת ההודעה: ' + error.message);
+            }
+
+            const lowerCaseText = userText.toLowerCase();
+            const creatorKeywords = ['מי ייצר אותך', 'מי בנה אותך', 'מי המפתח', 'מאיפה באת', 'מי עומד מאחוריך'];
+            const isCreatorQuestion = creatorKeywords.some(keyword => lowerCaseText.includes(keyword));
+
+            if (isCreatorQuestion) {
+                const botResponse = "פותחתי בעזרת יונתן ברקן.";
+                const botMessageDiv = document.createElement('div');
+                botMessageDiv.classList.add('message', 'bot');
+                botMessageDiv.innerText = botResponse;
+                chatMessages.append(botMessageDiv);
+
+                // Add bot message to Firestore
+                try {
+                    await addDoc(collection(db, `artifacts/${appId}/users/${currentUserId}/chat_messages`), {
+                        sender: 'bot',
+                        text: botResponse,
+                        timestamp: serverTimestamp()
+                    });
+                } catch (error) {
+                    console.error("Error saving bot message to Firestore:", error);
+                    showModal('שגיאה', 'שגיאה בשמירת תשובת הבוט: ' + error.message);
+                }
+
+                botMessageDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                return;
+            }
+
+            const typingIndicator = document.createElement('div');
+            typingIndicator.classList.add('message', 'typing-indicator');
+            typingIndicator.innerHTML = '<span>.</span><span>.</span><span>.</span>';
+            chatMessages.append(typingIndicator);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Prepare conversation history for Gemini API
+            // Filter out old "typing indicators" or other non-chat messages if any
+            const chatHistoryForGemini = conversationHistory.filter(msg => msg.role === 'user' || msg.role === 'model');
+
+            chatHistoryForGemini.push({
+                role: 'user',
+                parts: [{ text: userText }]
+            });
+
+            try {
+                const payload = { contents: chatHistoryForGemini };
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error.message || 'שגיאה בקבלת תשובה מהשרת.');
+                }
+
+                const data = await response.json();
+                const botResponseRaw = data.candidates[0].content.parts[0].text;
+
+                chatMessages.removeChild(typingIndicator);
+
+                const botResponseFormatted = formatBotResponse(botResponseRaw);
+                const botMessageDiv = document.createElement('div');
+                botMessageDiv.classList.add('message', 'bot');
+                botMessageDiv.innerHTML = botResponseFormatted;
+                chatMessages.append(botMessageDiv);
+
+                // Add bot response to Firestore
+                try {
+                    await addDoc(collection(db, `artifacts/${appId}/users/${currentUserId}/chat_messages`), {
+                        sender: 'bot',
+                        text: botResponseRaw,
+                        timestamp: serverTimestamp()
+                    });
+                } catch (error) {
+                    console.error("Error saving bot message to Firestore:", error);
+                    showModal('שגיאה', 'שגיאה בשמירת תשובת הבוט: ' + error.message);
+                }
+
+                // Update local conversation history for future API calls
+                conversationHistory.push({
+                    role: 'model',
+                    parts: [{ text: botResponseRaw }]
+                });
+
+                botMessageDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            } catch (error) {
+                chatMessages.removeChild(typingIndicator);
+                const errorDiv = document.createElement('div');
+                errorDiv.classList.add('message', 'bot');
+                errorDiv.textContent = 'אירעה שגיאה: ' + error.message;
+                chatMessages.append(errorDiv);
+                console.error("Gemini API error:", error);
+                showModal('שגיאה', 'אירעה שגיאה בתקשורת עם הבוט: ' + error.message);
+            }
+        }
+
+        function handleKey(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // --- Admin Panel Logic ---
+        adminButton.addEventListener('click', () => {
+            adminPanel.classList.remove('hidden');
+            adminPasswordInput.value = '';
+            adminPasswordInput.style.borderColor = '#00f0ff';
+            adminContentArea.classList.add('hidden');
         });
-        document.getElementById("messageInput").value = "";
-      } catch (err) {
-        alert("שגיאה בשליחה: " + err.message);
-      }
-    }
 
-    function loadMessages(uid) {
-      const q = query(
-        collection(db, "messages"),
-        where("uid", "==", uid),
-        orderBy("timestamp", "desc")
-      );
-
-      onSnapshot(q, (snapshot) => {
-        messagesList.innerHTML = "";
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          const el = document.createElement("div");
-          el.className = "message";
-          el.textContent = data.text;
-          messagesList.appendChild(el);
+        submitAdminPassword.addEventListener('click', () => {
+            if (adminPasswordInput.value === adminPassword) {
+                adminPasswordInput.style.borderColor = '#00ff00';
+                adminContentArea.classList.remove('hidden');
+                // Removed user listing/deletion as it's not securely feasible client-side with Firebase Auth
+            } else {
+                adminPasswordInput.style.borderColor = '#ff4d4d';
+                showModal('שגיאת סיסמה', 'סיסמה שגויה!');
+            }
         });
-      });
-    }
-  </script>
+
+        closeAdminPanelButton.addEventListener('click', () => {
+            adminPanel.classList.add('hidden');
+            adminPasswordInput.style.borderColor = '#00f0ff';
+        });
+
+        // --- Event Listeners ---
+        loginForm.addEventListener('submit', handleLogin);
+        registerForm.addEventListener('submit', handleRegistration);
+        logoutButton.addEventListener('click', handleLogout);
+        modalOkButton.addEventListener('click', hideModal);
+
+        // --- Firebase Auth State Listener ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUserId = user.uid;
+                // Fetch username from Firestore if available, otherwise use email
+                currentUsername = await fetchUsername(user.uid);
+
+                authContainer.classList.add('hidden');
+                chatContainer.classList.remove('hidden');
+                chatTitle.textContent = `הצ'אט של ${currentUsername}`;
+                document.title = `צ'אט - ${currentUsername}`;
+
+                // Unsubscribe from previous listener if exists
+                if (unsubscribeSnapshot) {
+                    unsubscribeSnapshot();
+                }
+
+                // Set up Firestore listener for chat messages
+                const q = query(collection(db, `artifacts/${appId}/users/${currentUserId}/chat_messages`), orderBy('timestamp'));
+                unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
+                    const messages = [];
+                    snapshot.forEach((doc) => {
+                        messages.push(doc.data());
+                    });
+                    conversationHistory = messages.map(msg => ({
+                        role: msg.sender === 'user' ? 'user' : 'model',
+                        parts: [{ text: msg.text }]
+                    }));
+                    displayMessages(messages);
+                }, (error) => {
+                    console.error("Error fetching chat messages:", error);
+                    showModal('שגיאת צ\'אט', 'אירעה שגיאה בטעינת היסטוריית הצ\'אט: ' + error.message);
+                });
+
+            } else {
+                currentUserId = null;
+                currentUsername = null;
+                authContainer.classList.remove('hidden');
+                chatContainer.classList.add('hidden');
+                chatMessages.innerHTML = '';
+                conversationHistory = [];
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                loginError.classList.add('hidden');
+                registerError.classList.add('hidden');
+                loginError.classList.remove('visible');
+                registerError.classList.remove('visible');
+                authContainer.querySelector('h2').textContent = 'התחברות';
+                authContainer.querySelector('.auth-switch').textContent = 'אין לך חשבון? הירשם';
+
+                // Unsubscribe from previous listener if user logs out
+                if (unsubscribeSnapshot) {
+                    unsubscribeSnapshot();
+                    unsubscribeSnapshot = null;
+                }
+
+                // If no user, try to sign in anonymously with the initial token
+                if (initialAuthToken) {
+                    try {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } catch (error) {
+                        console.error("Error signing in with custom token:", error);
+                        // Fallback to anonymous if custom token fails
+                        try {
+                            await signInAnonymously(auth);
+                        } catch (anonError) {
+                            console.error("Error signing in anonymously:", anonError);
+                            showModal('שגיאת התחברות', 'אירעה שגיאה בהתחברות אוטומטית. אנא נסה שוב.');
+                        }
+                    }
+                } else {
+                    // If no initial token, sign in anonymously
+                    try {
+                        await signInAnonymously(auth);
+                    } catch (anonError) {
+                        console.error("Error signing in anonymously:", anonError);
+                        showModal('שגיאת התחברות', 'אירעה שגיאה בהתחברות אוטומטית. אנא נסה שוב.');
+                    }
+                }
+            }
+        });
+    </script>
 </body>
 </html>
